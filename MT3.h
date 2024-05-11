@@ -1,8 +1,18 @@
 #pragma once
+struct Vector2 {
+	float x;
+	float y;
+};
 struct Vector3 {
 	float x;
 	float y;
 	float z;
+};
+struct Vector4 {
+	float x;
+	float y;
+	float z;
+	float w;
 };
 struct Matrix4x4 {
 	float m[4][4];
@@ -12,6 +22,11 @@ struct Transform {
 	Vector3 rotate;
 	Vector3 translate;
 };
+struct VertexData {
+	Vector4 position;
+	Vector2 texcoord;
+};
+
 //単位行列
 Matrix4x4 MakeIdentity4x4();
 

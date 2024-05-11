@@ -6,14 +6,7 @@
 #include <dxcapi.h>
 #pragma comment(lib,"dxcompiler.lib")
 
-struct Vector4 {
-	float x;
-	float y;
-	float z;
-	float w;
-};
-
-std::string ConvertString(const std::wstring& message);
+std::string ConvertString(const std::wstring& str);
 
 //Log関数
 void Log(const std::string& message);
