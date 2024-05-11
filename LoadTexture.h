@@ -2,7 +2,7 @@
 #include <d3d12.h>
 #pragma comment(lib,"d3d12.lib")
 #include <string>
-#include "externals/DirectXTex/DirectXTexP.h"
+#include "externals/DirectXTex/DirectXTex.h"
 
 std::wstring ConvertString(const std::string& str);
 //Textureデータを読む
