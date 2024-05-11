@@ -635,10 +635,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		//解放の処理
 		CloseHandle(fenceEvent);
 		fence->Release();
+		dxcUtils->Release();
+		dxcCompiler->Release();
 		rtvDescriptorHeap->Release();
 		srvDescriptorHeap->Release();
 		swapChainResources[0]->Release();
-		swapChainResources[0]->Release();
+		swapChainResources[1]->Release();
 		swapChain->Release();
 		commandList->Release();
 		commandAllocator->Release();
@@ -652,6 +654,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		CloseWindow(hwnd);
 		vertexResource->Release();
 		graphicsPipelineState->Release();
+		includeHandler->Release();
 		signatureBlob->Release();
 		if (errorBlob) {
 			errorBlob->Release();
