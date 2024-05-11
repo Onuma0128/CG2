@@ -317,7 +317,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		D3D12_COLOR_WRITE_ENABLE_ALL;
 	//RasiterzerStateの設定
 	D3D12_RASTERIZER_DESC rasterizerDesc{};
-	//裏面(時計回り)を表示しない
+	//裏面(時計回り)を表示
+	//する
+	//rasterizerDesc.CullMode = D3D12_CULL_MODE_NONE;
+	//しない
 	rasterizerDesc.CullMode = D3D12_CULL_MODE_BACK;
 	//三角形の中を塗りつぶす
 	rasterizerDesc.FillMode = D3D12_FILL_MODE_SOLID;
@@ -494,6 +497,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			//開発用UIの処理.
 			ImGui::ShowDemoWindow();
 			ImGui::Begin("Window");
+			ImGui::ColorEdit3("Color", (float*)&materialData->x);
 			ImGui::DragFloat3("Scale", &transform.scale.x, 0.01f);
 			ImGui::DragFloat3("Rotate", &transform.rotate.x, 0.01f);
 			ImGui::DragFloat3("Translate", &transform.translate.x, 0.01f);
