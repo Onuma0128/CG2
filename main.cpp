@@ -388,17 +388,17 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//書き込むためのアドレスを取得
 	vertexResource->Map(0, nullptr, reinterpret_cast<void**>(&vertexData));
 	//左下
-	vertexData[0].position = { -0.5f,-0.5f,0.0f,1.0f };
+	vertexData[0].position = { -0.5f,-0.5f,-(sqrtf(3.0f) / 2.0f - sqrtf(3.0f) / 3.0f),1.0f };
 	vertexData[0].texcoord = { 0.0f,1.0f };
 	//上
-	vertexData[1].position = { 0.0f,sqrtf(3.0f) / 2.0f - 0.5f,0.0f,1.0f };
+	vertexData[1].position = { 0.0f,-0.5f,sqrtf(3.0f) / 3.0f,1.0f };
 	vertexData[1].texcoord = { 0.5f,1.0f - sqrtf(3.0f) / 2.0f };
 	//右下
-	vertexData[2].position = { 0.5f,-0.5f,0.0f,1.0f };
+	vertexData[2].position = { 0.5f,-0.5f,-(sqrtf(3.0f) / 2.0f - sqrtf(3.0f) / 3.0f),1.0f };
 	vertexData[2].texcoord = { 1.0f,1.0f };
 
 	//左上
-	vertexData[3].position = { 0.0f,sqrtf(3.0f) / 2.0f - 1.0f,-sqrtf(2.0f / 3.0f),1.0f };
+	vertexData[3].position = { 0.0f,sqrtf(3.0f) / 2.0f - 0.5f,0.0f,1.0f};
 	vertexData[3].texcoord = { 0.0f,0.0f };;
 	//右上
 	vertexData[4].position = vertexData[1].position;
