@@ -614,8 +614,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			hr = commandList->Reset(commandAllocator, nullptr);
 			assert(SUCCEEDED(hr));
 			/*transform.rotate.x += 0.01f;
+			transform.rotate.z += 0.01f;*/
 			transform.rotate.y += 0.02f;
-			transform.rotate.z += 0.03f;*/
 			//Transform変換
 			Matrix4x4 worldMatrix = MakeAfineMatrix(transform.scale, transform.rotate, transform.translate);
 			*wvpData = worldMatrix;
