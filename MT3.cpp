@@ -1,5 +1,6 @@
 #include "MT3.h"
 #include <cmath>
+#include <vector>
 
 Matrix4x4 MakeIdentity4x4()
 {
@@ -151,4 +152,48 @@ Matrix4x4 MakePerspectiveFovMatrix(float fovY, float aspecRatio, float nearClip,
 		0, 0, farClip / (farClip - nearClip), 1,
 		0, 0,-(nearClip * farClip) / (farClip - nearClip), 0 };
 	return result;
+}
+
+Matrix4x4 MakeOrthographicMatrix(float left, float top, float right, float bottom, float nearClip, float farClip)
+{
+	Matrix4x4 result{
+		2 / (right - left), 0, 0, 0,
+		0, 2 / (top - bottom), 0, 0,
+		0, 0, 1 / (farClip - nearClip), 0,
+		(left + right) / (left - right), (top + bottom) / (bottom - top), nearClip / (nearClip - farClip), 1
+	};
+	return result;
+}
+
+VertexData* DrawSphere(VertexData* vertexData, uint32_t kSubdivision) {
+
+	const float kLonEvery = 2 * pi / float(kSubdivision); // 経度
+	const float kLatEvery = pi / float(kSubdivision);     // 緯度
+	for (uint32_t latIndex = 0; latIndex < kSubdivision; ++latIndex) {
+		float lat0 = -pi / 2.0f + kLatEvery * latIndex; // 緯度の方向に分割
+		float lat1 = lat0 + kLatEvery;
+		for (uint32_t lonIndex = 0; lonIndex < kSubdivision; ++lonIndex) {
+			uint32_t start = (latIndex * kSubdivision + lonIndex) * 6;
+			float lon0 = kLonEvery * lonIndex; // 経度の方向に分割
+			float lon1 = lon0 + kLonEvery; 
+			float u0 = float(lonIndex) / float(kSubdivision);
+			float u1 = float(lonIndex + 1) / float(kSubdivision);
+			float v0 = 1.0f - float(latIndex) / float(kSubdivision);
+			float v1 = 1.0f - float(latIndex + 1) / float(kSubdivision);
+			//頂点座標を計算
+			vertexData[start].position = { std::cos(lat0) * std::cos(lon0), std::sin(lat0), std::cos(lat0) * std::sin(lon0), 1.0f };
+			vertexData[start].texcoord = { u0, v0 };
+			vertexData[start + 1].position = { std::cos(lat1) * std::cos(lon0), std::sin(lat1), std::cos(lat1) * std::sin(lon0), 1.0f };
+			vertexData[start + 1].texcoord = { u0, v1 };
+			vertexData[start + 2].position = { std::cos(lat0) * std::cos(lon1), std::sin(lat0), std::cos(lat0) * std::sin(lon1), 1.0f };
+			vertexData[start + 2].texcoord = { u1, v0 };
+			vertexData[start + 3].position = { std::cos(lat1) * std::cos(lon0), std::sin(lat1), std::cos(lat1) * std::sin(lon0), 1.0f };
+			vertexData[start + 3].texcoord = { u0, v1 };
+			vertexData[start + 4].position = { std::cos(lat1) * std::cos(lon1), std::sin(lat1), std::cos(lat1) * std::sin(lon1), 1.0f };
+			vertexData[start + 4].texcoord = { u1, v1 };
+			vertexData[start + 5].position = { std::cos(lat0) * std::cos(lon1), std::sin(lat0), std::cos(lat0) * std::sin(lon1), 1.0f };
+			vertexData[start + 5].texcoord = { u1, v0 };
+		}
+	}
+	return vertexData;
 }
