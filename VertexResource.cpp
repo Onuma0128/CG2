@@ -1,0 +1,152 @@
+#include "VertexResource.h"
+#include <cassert>
+
+void VertexResource::Initialize(ID3D12Device* device)
+{
+	//実際に頂点リソースを作る
+	vertexResource = CreateBufferResource(device, sizeof(VertexData) * 1536);
+	//Sprite用の頂点リソースを作る
+	vertexResourceSprite = CreateBufferResource(device, sizeof(VertexData) * 6);
+
+	//リソースの先頭のアドレスから使う
+	vertexBufferView.BufferLocation = vertexResource->GetGPUVirtualAddress();
+	vertexBufferViewSprite.BufferLocation = vertexResourceSprite->GetGPUVirtualAddress();
+	//使用するリソースのサイズは頂点3つ分のサイズ
+	vertexBufferView.SizeInBytes = sizeof(VertexData) * 1536;
+	vertexBufferViewSprite.SizeInBytes = sizeof(VertexData) * 6;
+	//頂点当たりのサイズ
+	vertexBufferView.StrideInBytes = sizeof(VertexData);
+	vertexBufferViewSprite.StrideInBytes = sizeof(VertexData);
+	//Resourceにデータを書き込む
+	//書き込むためのアドレスを取得
+	vertexResource->Map(0, nullptr, reinterpret_cast<void**>(&vertexData));
+	vertexData = DrawSphere(vertexData, vertexCount);
+	//法線情報の追加
+	for (uint32_t index = 0; index < 1536; ++index) {
+		vertexData[index].normal.x = vertexData[index].position.x;
+		vertexData[index].normal.y = vertexData[index].position.y;
+		vertexData[index].normal.z = vertexData[index].position.z;
+	}
+	//書き込むためのアドレスを取得
+	vertexResourceSprite->Map(0, nullptr, reinterpret_cast<void**>(&vertexDataSprite));
+	//1枚目の三角形
+	vertexDataSprite[0].position = { 0.0f,360.0f,0.0f,1.0f };//左下
+	vertexDataSprite[0].texcoord = { 0.0f,1.0f };
+	vertexDataSprite[1].position = { 0.0f,0.0f,0.0f,1.0f };//左上
+	vertexDataSprite[1].texcoord = { 0.0f,0.0f };
+	vertexDataSprite[2].position = { 640.0f,360.0f,0.0f,1.0f };//右下
+	vertexDataSprite[2].texcoord = { 1.0f,1.0f };
+	//2枚目の三角形
+	vertexDataSprite[3].position = { 0.0f,0.0f,0.0f,1.0f };//左下
+	vertexDataSprite[3].texcoord = { 0.0f,0.0f };
+	vertexDataSprite[4].position = { 640.0f,0.0f,0.0f,1.0f };//右上
+	vertexDataSprite[4].texcoord = { 1.0f,0.0f };
+	vertexDataSprite[5].position = { 640.0f,360.0f,0.0f,1.0f };//右下
+	vertexDataSprite[5].texcoord = { 1.0f,1.0f };
+	//法線情報の追加
+	vertexDataSprite[0].normal = { 0.0f,0.0f,-1.0f };
+
+	//マテリアル用のリソースを作る。今回はcolor1つ分のサイズを用意する
+	materialResource = CreateBufferResource(device, sizeof(Material));
+	//書き込むためのアドレスを取得
+	materialResource->Map(0, nullptr, reinterpret_cast<void**>(&materialData));
+	//今回は赤を書き込んでいく
+	materialData->color = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
+	//Sprite用のマテリアルリソースを作る
+	materialResourceSprite = CreateBufferResource(device, sizeof(Material));
+	materialResourceSprite->Map(0, nullptr, reinterpret_cast<void**>(&materialDataSprite));
+	materialDataSprite->color = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
+	materialDataSprite->enableLighting = false;
+
+	//WVP用のリソースを作る。Matrix4x4 1つ分のサイズを用意する
+	wvpResource = CreateBufferResource(device, sizeof(Matrix4x4));
+	//Sprite用
+	transformationMatrixResourceSprite = CreateBufferResource(device, sizeof(Matrix4x4));
+	//データを書き込む
+	wvpData = nullptr;
+	transformationMatrixDataSprite = nullptr;
+	//書き込むためのアドレスを取得
+	wvpResource->Map(0, nullptr, reinterpret_cast<void**>(&wvpData));
+	transformationMatrixResourceSprite->Map(0, nullptr, reinterpret_cast<void**>(&transformationMatrixDataSprite));
+	//単位行列を書き込んでおく
+	*wvpData = MakeIdentity4x4();
+	*transformationMatrixDataSprite = MakeIdentity4x4();
+}
+
+void VertexResource::Update()
+{
+	//Transform変換
+	Matrix4x4 worldMatrix = MakeAfineMatrix(transform.scale, transform.rotate, transform.translate);
+	*wvpData = worldMatrix;
+	//Sprite用
+	Matrix4x4 worldMatrixSprite = MakeAfineMatrix(transformSprite.scale, transformSprite.rotate, transformSprite.translate);
+	Matrix4x4 viewMatrixSprite = MakeIdentity4x4();
+	Matrix4x4 projectionMatrixSprite = MakeOrthographicMatrix(0.0f, 0.0f, float(kClientWidth), float(kClientHeight), 0.0f, 100.0f);
+	Matrix4x4 worldViewProjectionMatrixSprite = Multiply(worldMatrixSprite, Multiply(viewMatrixSprite, projectionMatrixSprite));
+	*transformationMatrixDataSprite = worldViewProjectionMatrixSprite;
+	//Camera変換
+	Matrix4x4 cameraMatrix = MakeAfineMatrix(cameraTransform.scale, cameraTransform.rotate, cameraTransform.translate);
+	Matrix4x4 viewMatrix = Inverse(cameraMatrix);
+	Matrix4x4 projectionMatrix = MakePerspectiveFovMatrix(0.45f, float(kClientWidth) / float(kClientHeight), 0.1f, 100.0f);
+	Matrix4x4 worldViewProjectionMatrix = Multiply(worldMatrix, Multiply(viewMatrix, projectionMatrix));
+	*wvpData = worldViewProjectionMatrix;
+}
+
+void VertexResource::ImGui(bool& useMonsterBall)
+{
+	ImGui::Begin("Window");
+	ImGui::ColorEdit3("Color", (float*)&materialData->color.x);
+	ImGui::DragFloat3("Scale", &transform.scale.x, 0.01f);
+	ImGui::DragFloat3("Rotate", &transform.rotate.x, 0.01f);
+	ImGui::DragFloat3("Translate", &transform.translate.x, 0.01f);
+	ImGui::Checkbox("useMonsterBall", &useMonsterBall);
+	ImGui::End();
+
+	ImGui::Begin("Sprite");
+	ImGui::DragFloat3("Scale", &transformSprite.scale.x, 0.01f);
+	ImGui::DragFloat3("Rotate", &transformSprite.rotate.x, 0.01f);
+	ImGui::DragFloat3("Translate", &transformSprite.translate.x, 5.0f);
+	ImGui::End();
+}
+
+void VertexResource::Release()
+{
+	vertexResource->Release();
+	vertexResourceSprite->Release();
+	materialResource->Release();
+	materialResourceSprite->Release();
+	wvpResource->Release();
+	transformationMatrixResourceSprite->Release();
+}
+
+ID3D12Resource* CreateBufferResource(ID3D12Device* device, size_t sizeInBytes)
+{
+	// 頂点リソースのヒープの設定
+	D3D12_HEAP_PROPERTIES uploadHeapProperties = {};
+	uploadHeapProperties.Type = D3D12_HEAP_TYPE_UPLOAD;
+
+	// 頂点リソースの設定
+	D3D12_RESOURCE_DESC vertexResourceDesc = {};
+	vertexResourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
+	vertexResourceDesc.Width = sizeof(Material) * sizeInBytes;
+	vertexResourceDesc.Height = 1;
+	vertexResourceDesc.DepthOrArraySize = 1;
+	vertexResourceDesc.MipLevels = 1;
+	vertexResourceDesc.SampleDesc.Count = 1;
+	vertexResourceDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+
+	// 頂点リソースを作成する
+	ID3D12Resource* vertexResource = nullptr;
+	HRESULT hr = device->CreateCommittedResource(
+		&uploadHeapProperties,
+		D3D12_HEAP_FLAG_NONE,
+		&vertexResourceDesc,
+		D3D12_RESOURCE_STATE_GENERIC_READ,
+		nullptr,
+		IID_PPV_ARGS(&vertexResource));
+
+	assert(SUCCEEDED(hr)); // エラーチェック
+
+	return vertexResource;
+
+}

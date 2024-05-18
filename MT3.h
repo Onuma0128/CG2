@@ -27,12 +27,21 @@ struct Transform {
 struct VertexData {
 	Vector4 position;
 	Vector2 texcoord;
+	Vector3 normal;
 };
 struct Sphere {
 	Vector3 center;
 	float radius;
 };
+struct Material {
+	Vector4 color;
+	int32_t enableLighting;
+};
 const float pi = 3.14f;
+//クライアント領域のサイズ
+const int32_t kClientWidth = 1280;
+const int32_t kClientHeight = 720;
+
 //単位行列
 Matrix4x4 MakeIdentity4x4();
 
