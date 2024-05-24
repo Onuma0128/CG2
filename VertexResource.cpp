@@ -6,21 +6,25 @@ void VertexResource::Initialize(ID3D12Device* device)
 	//実際に頂点リソースを作る
 	vertexResource = CreateBufferResource(device, sizeof(VertexData) * 1536);
 	//Sprite用の頂点リソースを作る
-	vertexResourceSprite = CreateBufferResource(device, sizeof(VertexData) * 6);
+	vertexResourceSprite = CreateBufferResource(device, sizeof(VertexData) * 4);
+	indexResourceSprite = CreateBufferResource(device, sizeof(uint32_t) * 6);
 	//平行光源用のリソースを作る
 	directionalLightResource = CreateBufferResource(device, sizeof(DirectionalLight));
 
 	//リソースの先頭のアドレスから使う
 	vertexBufferView.BufferLocation = vertexResource->GetGPUVirtualAddress();
 	vertexBufferViewSprite.BufferLocation = vertexResourceSprite->GetGPUVirtualAddress();
+	indexBufferViewSprite.BufferLocation = indexResourceSprite->GetGPUVirtualAddress();
 	directionalLightBufferView.BufferLocation = directionalLightResource->GetGPUVirtualAddress();
 	//使用するリソースのサイズは頂点3つ分のサイズ
 	vertexBufferView.SizeInBytes = sizeof(VertexData) * 1536;
-	vertexBufferViewSprite.SizeInBytes = sizeof(VertexData) * 6;
+	vertexBufferViewSprite.SizeInBytes = sizeof(VertexData) * 4;
+	indexBufferViewSprite.SizeInBytes = sizeof(uint32_t) * 6;
 	directionalLightBufferView.SizeInBytes = sizeof(DirectionalLight);
 	//頂点当たりのサイズ
 	vertexBufferView.StrideInBytes = sizeof(VertexData);
 	vertexBufferViewSprite.StrideInBytes = sizeof(VertexData);
+	indexBufferViewSprite.Format = DXGI_FORMAT_R32_UINT;
 	directionalLightBufferView.StrideInBytes = sizeof(DirectionalLight);
 	//Resourceにデータを書き込む
 	//書き込むためのアドレスを取得
@@ -32,22 +36,21 @@ void VertexResource::Initialize(ID3D12Device* device)
 	}
 	//書き込むためのアドレスを取得
 	vertexResourceSprite->Map(0, nullptr, reinterpret_cast<void**>(&vertexDataSprite));
-	//1枚目の三角形
+	//四角形の4つの頂点
 	vertexDataSprite[0].position = { 0.0f,360.0f,0.0f,1.0f };//左下
 	vertexDataSprite[0].texcoord = { 0.0f,1.0f };
 	vertexDataSprite[1].position = { 0.0f,0.0f,0.0f,1.0f };//左上
 	vertexDataSprite[1].texcoord = { 0.0f,0.0f };
 	vertexDataSprite[2].position = { 640.0f,360.0f,0.0f,1.0f };//右下
 	vertexDataSprite[2].texcoord = { 1.0f,1.0f };
-	//2枚目の三角形
-	vertexDataSprite[3].position = { 0.0f,0.0f,0.0f,1.0f };//左下
-	vertexDataSprite[3].texcoord = { 0.0f,0.0f };
-	vertexDataSprite[4].position = { 640.0f,0.0f,0.0f,1.0f };//右上
-	vertexDataSprite[4].texcoord = { 1.0f,0.0f };
-	vertexDataSprite[5].position = { 640.0f,360.0f,0.0f,1.0f };//右下
-	vertexDataSprite[5].texcoord = { 1.0f,1.0f };
+	vertexDataSprite[3].position = { 640.0f,0.0f,0.0f,1.0f };//右上
+	vertexDataSprite[3].texcoord = { 1.0f,0.0f };
 	//法線情報の追加
 	vertexDataSprite[0].normal = { 0.0f,0.0f,-1.0f };
+	//IndexData
+	indexResourceSprite->Map(0, nullptr, reinterpret_cast<void**>(&indexDataSprite));
+	indexDataSprite[0] = 0; indexDataSprite[1] = 1; indexDataSprite[2] = 2;
+	indexDataSprite[3] = 1; indexDataSprite[4] = 3; indexDataSprite[5] = 2;
 
 	directionalLightResource->Map(0, nullptr, reinterpret_cast<void**>(&directionalLightData));
 	//デフォルト値はとりあえず以下のようにする
@@ -108,7 +111,7 @@ void VertexResource::Update()
 	Matrix4x4 worldViewProjectionMatrix = Multiply(worldMatrix, Multiply(viewMatrix, projectionMatrix));
 	wvpData->WVP = worldViewProjectionMatrix;
 	wvpData->World = worldViewProjectionMatrix;
-
+	//LightのNormalize
 	directionalLightData->direction = Normalize(directionalLightData->direction);
 }
 
@@ -120,6 +123,7 @@ void VertexResource::ImGui(bool& useMonsterBall)
 	ImGui::DragFloat3("Rotate", &transform.rotate.x, 0.01f);
 	ImGui::DragFloat3("Translate", &transform.translate.x, 0.01f);
 	ImGui::Checkbox("useMonsterBall", &useMonsterBall);
+	ImGui::ColorEdit3("LightColor", (float*)&directionalLightData->color.x);
 	ImGui::DragFloat3("DirectionalLightData.Direction", &directionalLightData->direction.x, 0.01f);
 	ImGui::End();
 
@@ -134,10 +138,10 @@ void VertexResource::Release()
 {
 	vertexResource->Release();
 	vertexResourceSprite->Release();
+	indexResourceSprite->Release();
 	directionalLightResource->Release();
 	materialResource->Release();
 	materialResourceSprite->Release();
-	//materialResourceLight->Release();
 	wvpResource->Release();
 	transformationMatrixResourceSprite->Release();
 }

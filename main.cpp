@@ -486,12 +486,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			commandList->DrawInstanced(1536, 1, 0, 0);
 			//Spriteの描画
 			commandList->IASetVertexBuffers(0, 1, &vertexResource_->GetVertexBufferViewSprite());
+			commandList->IASetIndexBuffer(&vertexResource_->GetIndexBufferViewSprite());
 			//TransformtionMatrixCBufferの場所を設定
 			commandList->SetGraphicsRootConstantBufferView(0, vertexResource_->GetMaterialResourceSprite()->GetGPUVirtualAddress());
 			commandList->SetGraphicsRootConstantBufferView(1, vertexResource_->GetTransformationMatrixResourceSprite()->GetGPUVirtualAddress());
 			commandList->SetGraphicsRootDescriptorTable(2, textureResource_->GetTextureSrvHandleGPU());
 			//描画
-			commandList->DrawInstanced(6, 1, 0, 0);
+			commandList->DrawInstanced(4, 1, 0, 0);
+			commandList->DrawIndexedInstanced(6, 1, 0, 0, 0);
 			//実際のnommandListのImGuiの描画コマンドを積む
 			ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), commandList);
 			//画面に描く処理は全て終わり、画面に映すので、状態を遷移

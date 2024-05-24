@@ -16,6 +16,7 @@ public:
 	void Update();
 	D3D12_VERTEX_BUFFER_VIEW& GetVertexBufferView() { return vertexBufferView; }
 	D3D12_VERTEX_BUFFER_VIEW& GetVertexBufferViewSprite() { return vertexBufferViewSprite; }
+	D3D12_INDEX_BUFFER_VIEW& GetIndexBufferViewSprite() { return indexBufferViewSprite; }
 	ID3D12Resource* GetDirectionalLightResource() { return directionalLightResource; }
 	ID3D12Resource* GetMaterialResource() { return materialResource; }
 	ID3D12Resource* GetMaterialResourceSprite() { return materialResourceSprite; }
@@ -30,16 +31,19 @@ private:
 	ID3D12Resource* vertexResource = nullptr;
 	//Sprite用の頂点リソースを作る
 	ID3D12Resource* vertexResourceSprite = nullptr;
+	ID3D12Resource* indexResourceSprite = nullptr;
 	//平行光源用のリソースを作る
 	ID3D12Resource* directionalLightResource = nullptr;
 	//VertexBufferViewを作成する
 	//頂点バッファビューを作成する
 	D3D12_VERTEX_BUFFER_VIEW vertexBufferView{};
 	D3D12_VERTEX_BUFFER_VIEW vertexBufferViewSprite{};
+	D3D12_INDEX_BUFFER_VIEW indexBufferViewSprite{};
 	D3D12_VERTEX_BUFFER_VIEW directionalLightBufferView{};
 	//頂点リソースにデータを書き込む
 	VertexData* vertexData = nullptr;
 	VertexData* vertexDataSprite = nullptr;
+	uint32_t* indexDataSprite = nullptr;
 	DirectionalLight* directionalLightData = nullptr;
 	//分割数
 	uint32_t vertexCount = 16;
