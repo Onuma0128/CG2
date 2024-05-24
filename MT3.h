@@ -37,6 +37,15 @@ struct Material {
 	Vector4 color;
 	int32_t enableLighting;
 };
+struct TransformationMatrix {
+	Matrix4x4 WVP;
+	Matrix4x4 World;
+};
+struct DirectionalLight {
+	Vector4 color;
+	Vector3 direction;
+	float intensity;
+};
 const float pi = 3.14f;
 //クライアント領域のサイズ
 const int32_t kClientWidth = 1280;
@@ -44,6 +53,10 @@ const int32_t kClientHeight = 720;
 
 //単位行列
 Matrix4x4 MakeIdentity4x4();
+// 正規化
+Vector3 Normalize(const Vector3& v);
+// 正規化
+Vector3 Normalize(const Vector4& v);
 
 // 1.x軸の回転行列
 Matrix4x4 MakeRotateXMatrix(float radian);

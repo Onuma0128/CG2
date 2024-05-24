@@ -7,25 +7,28 @@ void VertexResource::Initialize(ID3D12Device* device)
 	vertexResource = CreateBufferResource(device, sizeof(VertexData) * 1536);
 	//Sprite用の頂点リソースを作る
 	vertexResourceSprite = CreateBufferResource(device, sizeof(VertexData) * 6);
+	//平行光源用のリソースを作る
+	directionalLightResource = CreateBufferResource(device, sizeof(DirectionalLight));
 
 	//リソースの先頭のアドレスから使う
 	vertexBufferView.BufferLocation = vertexResource->GetGPUVirtualAddress();
 	vertexBufferViewSprite.BufferLocation = vertexResourceSprite->GetGPUVirtualAddress();
+	directionalLightBufferView.BufferLocation = directionalLightResource->GetGPUVirtualAddress();
 	//使用するリソースのサイズは頂点3つ分のサイズ
 	vertexBufferView.SizeInBytes = sizeof(VertexData) * 1536;
 	vertexBufferViewSprite.SizeInBytes = sizeof(VertexData) * 6;
+	directionalLightBufferView.SizeInBytes = sizeof(DirectionalLight);
 	//頂点当たりのサイズ
 	vertexBufferView.StrideInBytes = sizeof(VertexData);
 	vertexBufferViewSprite.StrideInBytes = sizeof(VertexData);
+	directionalLightBufferView.StrideInBytes = sizeof(DirectionalLight);
 	//Resourceにデータを書き込む
 	//書き込むためのアドレスを取得
 	vertexResource->Map(0, nullptr, reinterpret_cast<void**>(&vertexData));
 	vertexData = DrawSphere(vertexData, vertexCount);
 	//法線情報の追加
 	for (uint32_t index = 0; index < 1536; ++index) {
-		vertexData[index].normal.x = vertexData[index].position.x;
-		vertexData[index].normal.y = vertexData[index].position.y;
-		vertexData[index].normal.z = vertexData[index].position.z;
+		vertexData[index].normal = Normalize(vertexData[index].position);
 	}
 	//書き込むためのアドレスを取得
 	vertexResourceSprite->Map(0, nullptr, reinterpret_cast<void**>(&vertexDataSprite));
@@ -46,15 +49,25 @@ void VertexResource::Initialize(ID3D12Device* device)
 	//法線情報の追加
 	vertexDataSprite[0].normal = { 0.0f,0.0f,-1.0f };
 
+	directionalLightResource->Map(0, nullptr, reinterpret_cast<void**>(&directionalLightData));
+	//デフォルト値はとりあえず以下のようにする
+	directionalLightData->color = { 1.0f,1.0f,1.0f,1.0f };
+	directionalLightData->direction = { 0.0f,-1.0f,0.0f };
+	directionalLightData->direction = Normalize(directionalLightData->direction);
+	directionalLightData->intensity = 1.0f;
+
 	//マテリアル用のリソースを作る。今回はcolor1つ分のサイズを用意する
 	materialResource = CreateBufferResource(device, sizeof(Material));
 	//書き込むためのアドレスを取得
 	materialResource->Map(0, nullptr, reinterpret_cast<void**>(&materialData));
-	//今回は赤を書き込んでいく
+	//今回は白を書き込んでいく
 	materialData->color = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
+	materialData->enableLighting = true;
 	//Sprite用のマテリアルリソースを作る
 	materialResourceSprite = CreateBufferResource(device, sizeof(Material));
+	//書き込むためのアドレスを取得
 	materialResourceSprite->Map(0, nullptr, reinterpret_cast<void**>(&materialDataSprite));
+	//今回は白を書き込んでいく
 	materialDataSprite->color = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
 	materialDataSprite->enableLighting = false;
 
@@ -69,27 +82,34 @@ void VertexResource::Initialize(ID3D12Device* device)
 	wvpResource->Map(0, nullptr, reinterpret_cast<void**>(&wvpData));
 	transformationMatrixResourceSprite->Map(0, nullptr, reinterpret_cast<void**>(&transformationMatrixDataSprite));
 	//単位行列を書き込んでおく
-	*wvpData = MakeIdentity4x4();
-	*transformationMatrixDataSprite = MakeIdentity4x4();
+	wvpData->WVP = MakeIdentity4x4();
+	wvpData->World = MakeIdentity4x4();
+	transformationMatrixDataSprite->WVP = MakeIdentity4x4();
+	transformationMatrixDataSprite->World = MakeIdentity4x4();
 }
 
 void VertexResource::Update()
 {
 	//Transform変換
 	Matrix4x4 worldMatrix = MakeAfineMatrix(transform.scale, transform.rotate, transform.translate);
-	*wvpData = worldMatrix;
+	wvpData->WVP = worldMatrix;
+	wvpData->World = worldMatrix;
 	//Sprite用
 	Matrix4x4 worldMatrixSprite = MakeAfineMatrix(transformSprite.scale, transformSprite.rotate, transformSprite.translate);
 	Matrix4x4 viewMatrixSprite = MakeIdentity4x4();
 	Matrix4x4 projectionMatrixSprite = MakeOrthographicMatrix(0.0f, 0.0f, float(kClientWidth), float(kClientHeight), 0.0f, 100.0f);
 	Matrix4x4 worldViewProjectionMatrixSprite = Multiply(worldMatrixSprite, Multiply(viewMatrixSprite, projectionMatrixSprite));
-	*transformationMatrixDataSprite = worldViewProjectionMatrixSprite;
+	transformationMatrixDataSprite->WVP = worldViewProjectionMatrixSprite;
+	transformationMatrixDataSprite->World = worldViewProjectionMatrixSprite;
 	//Camera変換
 	Matrix4x4 cameraMatrix = MakeAfineMatrix(cameraTransform.scale, cameraTransform.rotate, cameraTransform.translate);
 	Matrix4x4 viewMatrix = Inverse(cameraMatrix);
 	Matrix4x4 projectionMatrix = MakePerspectiveFovMatrix(0.45f, float(kClientWidth) / float(kClientHeight), 0.1f, 100.0f);
 	Matrix4x4 worldViewProjectionMatrix = Multiply(worldMatrix, Multiply(viewMatrix, projectionMatrix));
-	*wvpData = worldViewProjectionMatrix;
+	wvpData->WVP = worldViewProjectionMatrix;
+	wvpData->World = worldViewProjectionMatrix;
+
+	directionalLightData->direction = Normalize(directionalLightData->direction);
 }
 
 void VertexResource::ImGui(bool& useMonsterBall)
@@ -100,6 +120,7 @@ void VertexResource::ImGui(bool& useMonsterBall)
 	ImGui::DragFloat3("Rotate", &transform.rotate.x, 0.01f);
 	ImGui::DragFloat3("Translate", &transform.translate.x, 0.01f);
 	ImGui::Checkbox("useMonsterBall", &useMonsterBall);
+	ImGui::DragFloat3("DirectionalLightData.Direction", &directionalLightData->direction.x, 0.01f);
 	ImGui::End();
 
 	ImGui::Begin("Sprite");
@@ -113,8 +134,10 @@ void VertexResource::Release()
 {
 	vertexResource->Release();
 	vertexResourceSprite->Release();
+	directionalLightResource->Release();
 	materialResource->Release();
 	materialResourceSprite->Release();
+	//materialResourceLight->Release();
 	wvpResource->Release();
 	transformationMatrixResourceSprite->Release();
 }

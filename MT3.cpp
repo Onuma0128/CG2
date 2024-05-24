@@ -13,6 +13,29 @@ Matrix4x4 MakeIdentity4x4()
 	return result;
 }
 
+Vector3 Normalize(const Vector3& v) {
+	Vector3 result{};
+	float Length{};
+	Length = sqrtf(v.x * v.x + v.y * v.y + v.z * v.z);
+	if (Length != 0.0f) {
+		result.x = v.x / Length;
+		result.y = v.y / Length;
+		result.z = v.z / Length;
+	}
+	return result;
+}
+Vector3 Normalize(const Vector4& v) {
+	Vector3 result{};
+	float Length{};
+	Length = sqrtf(v.x * v.x + v.y * v.y + v.z * v.z);
+	if (Length != 0.0f) {
+		result.x = v.x / Length;
+		result.y = v.y / Length;
+		result.z = v.z / Length;
+	}
+	return result;
+}
+
 Matrix4x4 Multiply(const Matrix4x4& m1, const Matrix4x4& m2) {
 	Matrix4x4 result{};
 	result.m[0][0] = m1.m[0][0] * m2.m[0][0] + m1.m[0][1] * m2.m[1][0] + m1.m[0][2] * m2.m[2][0] + m1.m[0][3] * m2.m[3][0];
