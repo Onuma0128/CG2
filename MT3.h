@@ -16,6 +16,9 @@ struct Vector4 {
 	float z;
 	float w;
 };
+struct Matrix3x3 {
+	float m[3][3];
+};
 struct Matrix4x4 {
 	float m[4][4];
 };
@@ -36,6 +39,8 @@ struct Sphere {
 struct Material {
 	Vector4 color;
 	int32_t enableLighting;
+	float padding[3];
+	Matrix4x4 uvTransform;
 };
 struct TransformationMatrix {
 	Matrix4x4 WVP;
@@ -58,12 +63,16 @@ Vector3 Normalize(const Vector3& v);
 // 正規化
 Vector3 Normalize(const Vector4& v);
 
+//拡縮行列
+Matrix4x4 MakeScaleMatrix(const Vector3& scale);
 // 1.x軸の回転行列
 Matrix4x4 MakeRotateXMatrix(float radian);
 // 2.y軸の回転行列
 Matrix4x4 MakeRotateYMatrix(float radian);
 // 3.z軸の回転行列
 Matrix4x4 MakeRotateZMatrix(float radian);
+//移動行列
+Matrix4x4 MakeTranslateMatrix(const Vector3& translate);
 
 // 行列の積
 Matrix4x4 Multiply(const Matrix4x4& m1, const Matrix4x4& m2);

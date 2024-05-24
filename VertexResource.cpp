@@ -66,6 +66,7 @@ void VertexResource::Initialize(ID3D12Device* device)
 	//今回は白を書き込んでいく
 	materialData->color = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
 	materialData->enableLighting = true;
+	materialData->uvTransform = MakeIdentity4x4();
 	//Sprite用のマテリアルリソースを作る
 	materialResourceSprite = CreateBufferResource(device, sizeof(Material));
 	//書き込むためのアドレスを取得
@@ -73,6 +74,7 @@ void VertexResource::Initialize(ID3D12Device* device)
 	//今回は白を書き込んでいく
 	materialDataSprite->color = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
 	materialDataSprite->enableLighting = false;
+	materialDataSprite->uvTransform = MakeIdentity4x4();
 
 	//WVP用のリソースを作る。Matrix4x4 1つ分のサイズを用意する
 	wvpResource = CreateBufferResource(device, sizeof(Matrix4x4));
@@ -104,6 +106,11 @@ void VertexResource::Update()
 	Matrix4x4 worldViewProjectionMatrixSprite = Multiply(worldMatrixSprite, Multiply(viewMatrixSprite, projectionMatrixSprite));
 	transformationMatrixDataSprite->WVP = worldViewProjectionMatrixSprite;
 	transformationMatrixDataSprite->World = worldViewProjectionMatrixSprite;
+	//UVの行列を生成
+	uvTransformMatrix = MakeScaleMatrix(uvTransformSprite.scale);
+	uvTransformMatrix = Multiply(uvTransformMatrix, MakeRotateZMatrix(uvTransformSprite.rotate.z));
+	uvTransformMatrix = Multiply(uvTransformMatrix, MakeTranslateMatrix(uvTransformSprite.translate));
+	materialDataSprite->uvTransform = uvTransformMatrix;
 	//Camera変換
 	Matrix4x4 cameraMatrix = MakeAfineMatrix(cameraTransform.scale, cameraTransform.rotate, cameraTransform.translate);
 	Matrix4x4 viewMatrix = Inverse(cameraMatrix);
@@ -131,6 +138,9 @@ void VertexResource::ImGui(bool& useMonsterBall)
 	ImGui::DragFloat3("Scale", &transformSprite.scale.x, 0.01f);
 	ImGui::DragFloat3("Rotate", &transformSprite.rotate.x, 0.01f);
 	ImGui::DragFloat3("Translate", &transformSprite.translate.x, 5.0f);
+	ImGui::DragFloat2("UVTranslate", &uvTransformSprite.translate.x, 0.01f, -10.0f, 10.0f);
+	ImGui::DragFloat2("UVScale", &uvTransformSprite.scale.x, 0.01f, -10.0f, 10.0f);
+	ImGui::SliderAngle("UVRotate", &uvTransformSprite.rotate.z);
 	ImGui::End();
 }
 

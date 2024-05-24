@@ -88,6 +88,17 @@ Matrix4x4 MakeAfineMatrix(const Vector3& scale, const Vector3& rotate, const Vec
 	return result;
 }
 
+Matrix4x4 MakeScaleMatrix(const Vector3& scale)
+{
+	Matrix4x4 result{
+		scale.x, 0, 0, 0,
+		0, scale.y, 0, 0,
+		0, 0, scale.z, 0,
+		0, 0, 0, 1
+	};
+	return result;
+}
+
 Matrix4x4 MakeRotateXMatrix(float radian) {
 	Matrix4x4 result{ 1, 0, 0, 0, 0, std::cos(radian), std::sin(radian), 0, 0, std::sin(-radian), std::cos(radian), 0, 0, 0, 0, 1 };
 	return result;
@@ -100,6 +111,17 @@ Matrix4x4 MakeRotateYMatrix(float radian) {
 
 Matrix4x4 MakeRotateZMatrix(float radian) {
 	Matrix4x4 result{ std::cos(radian), std::sin(radian), 0, 0, std::sin(-radian), std::cos(radian), 0, 0, 0, 0, 1, 0, 0, 0, 0, 1 };
+	return result;
+}
+
+Matrix4x4 MakeTranslateMatrix(const Vector3& translate)
+{
+	Matrix4x4 result{
+		1,0,0,0,
+		0,1,0,0,
+		0,0,1,0,
+		translate.x,translate.y,translate.z,1,
+	};
 	return result;
 }
 
