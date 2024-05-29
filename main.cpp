@@ -320,9 +320,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	D3D12_RASTERIZER_DESC rasterizerDesc{};
 	//裏面(時計回り)を表示
 	//する
-	rasterizerDesc.CullMode = D3D12_CULL_MODE_NONE;
+	//rasterizerDesc.CullMode = D3D12_CULL_MODE_NONE;
 	//しない
-	//rasterizerDesc.CullMode = D3D12_CULL_MODE_BACK;
+	rasterizerDesc.CullMode = D3D12_CULL_MODE_BACK;
 	//三角形の中を塗りつぶす
 	rasterizerDesc.FillMode = D3D12_FILL_MODE_SOLID;
 	//Shaderをコンパイルする
@@ -464,7 +464,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	*wvpData = MakeIdentity4x4();
 
 	//Transform変数を作る
-	Transform transform{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
+	Transform transform{ {0.5f,0.5f,0.5f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
 	//Camera変数を作る
 	Transform cameraTransform{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,-5.0f} };
 
@@ -557,6 +557,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			ImGui::DragFloat3("Scale", &transform.scale.x, 0.01f);
 			ImGui::DragFloat3("Rotate", &transform.rotate.x, 0.01f);
 			ImGui::DragFloat3("Translate", &transform.translate.x, 0.01f);
+			ImGui::End();
+			ImGui::Begin("CameraTransform");
+			ImGui::DragFloat3("CameraRotate", &cameraTransform.rotate.x, 0.01f);
+			ImGui::DragFloat3("CameraTranslate", &cameraTransform.translate.x, 0.01f);
 			ImGui::End();
 			//ImGuiの内部コマンドを生成
 			ImGui::Render();
