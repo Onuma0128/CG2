@@ -473,14 +473,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	scissorRect.top = 0;
 	scissorRect.bottom = kClientHeight;
 
-	//マテリアル用のリソースを作る。今回はcolor1つ分のサイズを用意する
-	ID3D12Resource* materislResource = CreateBufferResource(device, sizeof(VertexData));
-	//マテリアルにデータを書き込む
-	Vector4* materialData = nullptr;
-	//書き込むためのアドレスを取得
-	materislResource->Map(0, nullptr, reinterpret_cast<void**>(&materialData));
-	//今回は赤を書き込んでいく
-	*materialData = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
+	////マテリアル用のリソースを作る。今回はcolor1つ分のサイズを用意する
+	//ID3D12Resource* materislResource = CreateBufferResource(device, sizeof(VertexData));
+	////マテリアルにデータを書き込む
+	//Vector4* materialData = nullptr;
+	////書き込むためのアドレスを取得
+	//materislResource->Map(0, nullptr, reinterpret_cast<void**>(&materialData));
+	////今回は赤を書き込んでいく
+	//*materialData = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
 
 	const int kSize = 51;
 
@@ -496,24 +496,25 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	}
 
 	// 定数バッファの準備（色用）
-	//std::vector<ID3D12Resource*> colorResources(kSize); // 三角形の数だけ用意
-	//std::vector<Vector4*> colorData(kSize);
+	std::vector<ID3D12Resource*> colorResources(kSize); // 三角形の数だけ用意
+	std::vector<Vector4*> colorData(kSize);
 
-	//for (size_t i = 0; i < colorResources.size(); i++) {
-	//	colorResources[i] = CreateBufferResource(device, sizeof(VertexData));
-	//	colorResources[i]->Map(0, nullptr, reinterpret_cast<void**>(&colorData[i]));
-	//	*colorData[i] = Vector4(1.0f, 1.0f, 1.0f, 1.0f); // 初期化（白色）
-	//}
+	for (size_t i = 0; i < colorResources.size(); i++) {
+		colorResources[i] = CreateBufferResource(device, sizeof(VertexData));
+		colorResources[i]->Map(0, nullptr, reinterpret_cast<void**>(&colorData[i]));
+		*colorData[i] = Vector4(1.0f, 1.0f, 1.0f, 1.0f); // 初期化（白色）
+	}
 	//Transform変数を作る
 	Transform transforms[kSize] = {};
 	for (int i = 0; i < kSize; i++) {
 		transforms[i] = { { 0.5f, 0.5f, 0.5f }, { 0.0f,0.0f,0.0f }, { 0.0f,0.0f,0.0f } };
 	}
-	bool isParticle[kSize]{};
-	float randRadX[kSize]{};
-	float randRadY[kSize]{};
-	float randRadZ[kSize]{};
+	//ランダムの回転用と座標用とスピード
+	Vector3 randRad[kSize]{};
+	Vector3 randTranslate{};
 	float randSpeedY[kSize]{};
+	//パーティクルを管理するフラグ
+	bool isParticle[kSize]{};
 	bool isSTOP = false;
 	//Camera変数を作る
 	Transform cameraTransform{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,-10.0f} };
@@ -581,12 +582,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			//指定した深度で画面全体をクリアする
 			commandList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 			//指定した色で画面全体をクリアする
-			float clearColor[] = { 0.1f,0.25f,0.5f,1.0f }; //青っぽい色。RGBAの順
+			//float clearColor[] = { 0.1f,0.25f,0.5f,1.0f }; //青っぽい色。RGBAの順
+			float clearColor[] = { 0.0f,0.0f,0.1f,1.0f }; //黒色。RGBAの順
 			commandList->ClearRenderTargetView(rtvHandles[backBufferIndex], clearColor, 0, nullptr);
 			//開発用UIの処理.
 			ImGui::ShowDemoWindow();
 			ImGui::Begin("Window");
-			ImGui::ColorEdit3("Color", (float*)&materialData->x);
 			ImGui::Checkbox("Texture", &textureResource_->GetTextureSwitch());
 			ImGui::ColorEdit3("DirectionalLightData.Color", &directionalLightData->color.x);
 			ImGui::DragFloat3("DirectionalLightData.Direction", &directionalLightData->direction.x, 0.01f);
@@ -614,18 +615,40 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			for (int i = 0; i < kSize; i++) {
 				// Transformの更新（適宜変更）
 				if (!isParticle[i]) {
-					float randX = (rand() % 81 - 40) * 0.1f;
-					float randY = (rand() % 10 + 4) * 0.5f;
-					float randZ = (rand() % 21 - 5) * 0.5f;
-					randRadX[i] = (rand() % 3 + 1) * 0.01f;
-					randRadY[i] = (rand() % 3 + 1) * 0.01f;
-					randRadY[i] = (rand() % 3 + 1) * 0.01f;
+					randTranslate.x = (rand() % 81 - 40) * 0.1f;
+					randTranslate.y = (rand() % 10 + 4) * 0.5f;
+					randTranslate.z = (rand() % 21 - 5) * 0.5f;
+					randRad[i].x = (rand() % 3 + 1) * 0.005f;
+					randRad[i].y = (rand() % 3 + 1) * 0.01f;
+					randRad[i].z = (rand() % 3 + 1) * 0.005f;
 					if (rand() % 2 == 0) {
-						randRadY[i] *= -1.0f;
+						randRad[i].y *= -1.0f;
 					}
 					randSpeedY[i] = (rand() % 5 + 1) * 0.005f;
 					isParticle[i] = true;
-					transforms[i].translate = { randX,randY,randZ };
+					transforms[i].translate = randTranslate;
+					*colorData[i] = Vector4{
+						(rand() % 256) / 255.0f,
+						(rand() % 256) / 255.0f,
+						(rand() % 256) / 255.0f,
+						1.0f
+					};
+					/*if (i < 25) {
+						*colorData[i] = Vector4{
+							1.0f,
+							0.0f,
+							0.0f,
+							1.0f
+						};
+					}
+					else {
+						*colorData[i] = Vector4{
+							0.0f,
+							0.0f,
+							1.0f,
+							1.0f
+						};
+					}*/
 				}
 			}
 			for (int i = 0; i < kSize; i++) {
@@ -638,7 +661,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 				wvpData[i]->World = worldViewProjectionMatrix;
 
 				// 定数バッファを設定
-				commandList->SetGraphicsRootConstantBufferView(0, materislResource->GetGPUVirtualAddress());
+				//commandList->SetGraphicsRootConstantBufferView(0, materislResource->GetGPUVirtualAddress());
+				commandList->SetGraphicsRootConstantBufferView(0, colorResources[i]->GetGPUVirtualAddress());
 				commandList->SetGraphicsRootConstantBufferView(1, wvpResources[i]->GetGPUVirtualAddress());
 				commandList->SetGraphicsRootDescriptorTable(2, textureResource_->GetTextureSwitch() ? textureResource_->GetTextureSrvHandleGPU2() : textureResource_->GetTextureSrvHandleGPU());
 				commandList->SetGraphicsRootConstantBufferView(3, directionalLightResource->GetGPUVirtualAddress());
@@ -684,9 +708,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 				for (int i = 0; i < kSize; i++) {
 					if (isParticle) {
 						transforms[i].translate.y -= randSpeedY[i];
-						transforms[i].rotate.x += randRadX[i];
-						transforms[i].rotate.y += randRadY[i];
-						transforms[i].rotate.z += randRadZ[i];
+						transforms[i].rotate.x += randRad[i].x;
+						transforms[i].rotate.y += randRad[i].y;
+						transforms[i].rotate.z += randRad[i].z;
 					}
 					if (transforms[i].translate.y < -3.0f) {
 						isParticle[i] = false;
@@ -732,7 +756,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		pixelShaderBlob->Release();
 		vertexShaderBlob->Release();
 		for (int i = 0; i < kSize; i++) {
-			materislResource->Release();
+			//materislResource->Release();
+			colorResources[i]->Release();
 			wvpResources[i]->Release();
 		}
 		directionalLightResource->Release();
