@@ -2,7 +2,7 @@
 
 void TextureResource::Initialize(ID3D12Device* device, ID3D12DescriptorHeap* srvDescriptorHeap, const uint32_t& descriptorSizeSRV)
 {
-	DirectX::ScratchImage mipImages = LoadTexture("resources/uvChecker.png");
+	DirectX::ScratchImage mipImages = LoadTexture("resources/white1x1.png");
 	const DirectX::TexMetadata& metadata = mipImages.GetMetadata();
 	textureResource = CreateTextureResource(device, metadata);
 	UploadTextureData(textureResource, mipImages);
@@ -20,7 +20,7 @@ void TextureResource::Initialize(ID3D12Device* device, ID3D12DescriptorHeap* srv
 	//SRVの生成
 	device->CreateShaderResourceView(textureResource, &srvDesc, textureSrvHandleCPU);
 	//２枚目のTextureを読んで転送する
-	DirectX::ScratchImage mipImages2 = LoadTexture("resources/white1x1.png");
+	DirectX::ScratchImage mipImages2 = LoadTexture("resources/uvChecker.png");
 	const DirectX::TexMetadata& metadata2 = mipImages2.GetMetadata();
 	textureResource2 = CreateTextureResource(device, metadata2);
 	UploadTextureData(textureResource2, mipImages2);

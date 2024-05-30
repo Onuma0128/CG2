@@ -25,10 +25,32 @@ struct Transform {
 struct VertexData {
 	Vector4 position;
 	Vector2 texcoord;
+	Vector3 normal;
+};
+struct TransformationMatrix {
+	Matrix4x4 WVP;
+	Matrix4x4 World;
+};
+struct DirectionalLight {
+	Vector4 color;
+	Vector3 direction;
+	float intensity;
 };
 
 //単位行列
 Matrix4x4 MakeIdentity4x4();
+// 加算
+Vector3 Add(const Vector3& v1, const Vector3& v2);
+// 減算
+Vector3 Subtract(const Vector4& v1, const Vector4& v2);
+// 正規化
+Vector3 Normalize(const Vector3& v);
+// 正規化
+Vector3 Normalize(const Vector4& v);
+// クロス積
+Vector3 Cross(const Vector3& v1, const Vector3& v2);
+//
+Vector3 CalculateNormal(const VertexData& v0, const VertexData& v1, const VertexData& v2);
 
 // 1.x軸の回転行列
 Matrix4x4 MakeRotateXMatrix(float radian);

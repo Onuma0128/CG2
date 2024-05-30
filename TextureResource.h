@@ -8,7 +8,7 @@ class TextureResource
 public:
 	void Initialize(ID3D12Device* device, ID3D12DescriptorHeap* srvDescriptorHeap, const uint32_t& descriptorSizeSRV);
 
-	bool& GetuseMonsterBall() { return useMonsterBall; }
+	bool& GetTextureSwitch() { return isTexture; }
 	D3D12_GPU_DESCRIPTOR_HANDLE GetTextureSrvHandleGPU() { return textureSrvHandleGPU; }
 	D3D12_GPU_DESCRIPTOR_HANDLE GetTextureSrvHandleGPU2() { return textureSrvHandleGPU2; }
 
@@ -26,5 +26,5 @@ private:
 	D3D12_CPU_DESCRIPTOR_HANDLE textureSrvHandleCPU2{};
 	D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU2{};
 	//texture切り替え用のフラグ
-	bool useMonsterBall = true;
+	bool isTexture = true;
 };
