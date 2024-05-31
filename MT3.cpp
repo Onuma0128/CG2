@@ -214,10 +214,10 @@ VertexData* DrawSphere(VertexData* vertexData, uint32_t kSubdivision) {
 
 	const float kLonEvery = 2 * pi / float(kSubdivision); // 経度
 	const float kLatEvery = pi / float(kSubdivision);     // 緯度
-	for (uint32_t latIndex = 0; latIndex < kSubdivision; ++latIndex) {
+	for (uint32_t latIndex = 0; latIndex < kSubdivision; latIndex++) {
 		float lat0 = -pi / 2.0f + kLatEvery * latIndex; // 緯度の方向に分割
 		float lat1 = lat0 + kLatEvery;
-		for (uint32_t lonIndex = 0; lonIndex < kSubdivision; ++lonIndex) {
+		for (uint32_t lonIndex = 0; lonIndex < kSubdivision; lonIndex++) {
 			uint32_t start = (latIndex * kSubdivision + lonIndex) * 6;
 			float lon0 = kLonEvery * lonIndex; // 経度の方向に分割
 			float lon1 = lon0 + kLonEvery; 

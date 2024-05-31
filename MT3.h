@@ -51,7 +51,7 @@ struct DirectionalLight {
 	Vector3 direction;
 	float intensity;
 };
-const float pi = 3.14f;
+const float pi = 3.141592653589793238462643383279f;
 //クライアント領域のサイズ
 const int32_t kClientWidth = 1280;
 const int32_t kClientHeight = 720;
