@@ -415,7 +415,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	//左上
 	vertexData[3].position = { 0.0f,sqrtf(3.0f) / 2.0f - 0.5f,0.0f,1.0f };
-	vertexData[3].texcoord = { 0.0f,0.0f };;
+	vertexData[3].texcoord = { 0.0f,0.0f };
 	//右上
 	vertexData[4].position = vertexData[1].position;
 	vertexData[4].texcoord = { 1.0f,0.0f };
@@ -473,15 +473,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	scissorRect.top = 0;
 	scissorRect.bottom = kClientHeight;
 
-	////マテリアル用のリソースを作る。今回はcolor1つ分のサイズを用意する
-	//ID3D12Resource* materislResource = CreateBufferResource(device, sizeof(VertexData));
-	////マテリアルにデータを書き込む
-	//Vector4* materialData = nullptr;
-	////書き込むためのアドレスを取得
-	//materislResource->Map(0, nullptr, reinterpret_cast<void**>(&materialData));
-	////今回は赤を書き込んでいく
-	//*materialData = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
-
+	//
 	const int kSize = 51;
 
 	// 定数バッファの準備（行列用）
@@ -506,6 +498,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	}
 	//Transform変数を作る
 	Transform transforms[kSize] = {};
+	Transform sliderTransform{};
+	Vector3 initialPositions[kSize]{};
+	Vector3 initialScales[kSize]{};
 	for (int i = 0; i < kSize; i++) {
 		transforms[i] = { { 0.5f, 0.5f, 0.5f }, { 0.0f,0.0f,0.0f }, { 0.0f,0.0f,0.0f } };
 	}
@@ -589,6 +584,23 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			ImGui::ShowDemoWindow();
 			ImGui::Begin("Window");
 			ImGui::Checkbox("Texture", &textureResource_->GetTextureSwitch());
+			//ImGui::TreeNode();
+			if (ImGui::DragFloat3("objScale Data", &sliderTransform.scale.x, 0.001f)) {
+				for (int i = 0; i < kSize; i++) {
+					initialScales[i] = transforms[i].scale;
+					Vector3 newScale = Add(initialScales[i], sliderTransform.scale);
+					transforms[i].scale = newScale;
+				}
+				sliderTransform.scale = Vector3{ 0,0,0 };
+			}
+			if (ImGui::DragFloat3("objTranslate Data", &sliderTransform.translate.x, 0.001f)) {
+				for (int i = 0; i < kSize; i++) {
+					initialPositions[i] = transforms[i].translate;
+					Vector3 newPosition = Add(initialPositions[i], sliderTransform.translate);
+					transforms[i].translate = newPosition;
+				}
+				sliderTransform.translate = Vector3{ 0,0,0 };
+			}
 			ImGui::ColorEdit3("DirectionalLightData.Color", &directionalLightData->color.x);
 			ImGui::DragFloat3("DirectionalLightData.Direction", &directionalLightData->direction.x, 0.01f);
 			ImGui::Checkbox("STOP", &isSTOP);
@@ -624,7 +636,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 					if (rand() % 2 == 0) {
 						randRad[i].y *= -1.0f;
 					}
-					randSpeedY[i] = (rand() % 5 + 1) * 0.005f;
+					randSpeedY[i] = (rand() % 5 + 1) * 0.01f;
 					isParticle[i] = true;
 					transforms[i].translate = randTranslate;
 					*colorData[i] = Vector4{
@@ -633,22 +645,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 						(rand() % 256) / 255.0f,
 						1.0f
 					};
-					/*if (i < 25) {
-						*colorData[i] = Vector4{
-							1.0f,
-							0.0f,
-							0.0f,
-							1.0f
-						};
-					}
-					else {
-						*colorData[i] = Vector4{
-							0.0f,
-							0.0f,
-							1.0f,
-							1.0f
-						};
-					}*/
 				}
 			}
 			for (int i = 0; i < kSize; i++) {
@@ -661,7 +657,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 				wvpData[i]->World = worldViewProjectionMatrix;
 
 				// 定数バッファを設定
-				//commandList->SetGraphicsRootConstantBufferView(0, materislResource->GetGPUVirtualAddress());
 				commandList->SetGraphicsRootConstantBufferView(0, colorResources[i]->GetGPUVirtualAddress());
 				commandList->SetGraphicsRootConstantBufferView(1, wvpResources[i]->GetGPUVirtualAddress());
 				commandList->SetGraphicsRootDescriptorTable(2, textureResource_->GetTextureSwitch() ? textureResource_->GetTextureSrvHandleGPU2() : textureResource_->GetTextureSrvHandleGPU());
