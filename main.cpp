@@ -415,33 +415,33 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	//左上
 	vertexData[3].position = { 0.0f,sqrtf(3.0f) / 2.0f - 0.5f,0.0f,1.0f };
-	vertexData[3].texcoord = { 0.0f,0.0f };
+	vertexData[3].texcoord = { 0.5f,0.0f };
 	//右上
 	vertexData[4].position = vertexData[1].position;
-	vertexData[4].texcoord = { 1.0f,0.0f };
+	vertexData[4].texcoord = { 0.0f,1.0f };
 	//下
 	vertexData[5].position = vertexData[0].position;
-	vertexData[5].texcoord = { 0.5f,1.0f };
+	vertexData[5].texcoord = { 1.0f,1.0f };
 
 	//左上
 	vertexData[6].position = vertexData[1].position;
-	vertexData[6].texcoord = { 0.0f,0.0f };
+	vertexData[6].texcoord = { 0.0f,1.0f };
 	//右上
 	vertexData[7].position = vertexData[3].position;
-	vertexData[7].texcoord = { 1.0f,0.0f };
+	vertexData[7].texcoord = vertexData[3].texcoord;
 	//下
 	vertexData[8].position = vertexData[2].position;
-	vertexData[8].texcoord = { 0.5f,1.0f };
+	vertexData[8].texcoord = { 1.0f,1.0f };
 
 	//左上
 	vertexData[9].position = vertexData[0].position;
-	vertexData[9].texcoord = { 0.0f,0.0f };
+	vertexData[9].texcoord = { 1.0f,1.0f };
 	//右上
 	vertexData[10].position = vertexData[2].position;
-	vertexData[10].texcoord = { 1.0f,0.0f };
+	vertexData[10].texcoord = { 0.0f,1.0f };
 	//下
 	vertexData[11].position = vertexData[3].position;
-	vertexData[11].texcoord = { 0.5f,1.0f };
+	vertexData[11].texcoord = vertexData[3].texcoord;
 
 	// 正三角錐の各面の法線を計算
 	vertexData[0].normal = vertexData[1].normal = vertexData[2].normal = CalculateNormal(vertexData[0], vertexData[1], vertexData[2]);
@@ -517,7 +517,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//パーティクルを管理するフラグ
 	bool isParticle[kParticleSize]{};
 	bool isParticleStop = false;
-	bool isParticleRandomColor = true;
+	bool isParticleRandomColor = false;
 	//Camera変数を作る
 	Transform cameraTransform{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,-10.0f} };
 
@@ -618,7 +618,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			ImGui::ColorEdit3("ParticleColor", &particleColor.x);
 			ImGui::Checkbox("ParticleRandomColor", &isParticleRandomColor);
 			ImGui::Checkbox("ParticleStop", &isParticleStop);
-			ImGui::Checkbox("Texture", &textureResource_->GetTextureSwitch());
+			textureResource_->ImGui();
 			ImGui::ColorEdit3("DirectionalLightData.Color", &directionalLightData->color.x);
 			ImGui::DragFloat3("DirectionalLightData.Direction", &directionalLightData->direction.x, 0.01f);
 			ImGui::End();
@@ -677,7 +677,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 				// 定数バッファを設定
 				commandList->SetGraphicsRootConstantBufferView(0, colorResources[i]->GetGPUVirtualAddress());
 				commandList->SetGraphicsRootConstantBufferView(1, wvpResources[i]->GetGPUVirtualAddress());
-				commandList->SetGraphicsRootDescriptorTable(2, textureResource_->GetTextureSwitch() ? textureResource_->GetTextureSrvHandleGPU2() : textureResource_->GetTextureSrvHandleGPU());
+				commandList->SetGraphicsRootDescriptorTable(2, textureResource_->GetTextureSrvHandleGPU());
 				commandList->SetGraphicsRootConstantBufferView(3, directionalLightResource->GetGPUVirtualAddress());
 
 				// 描画
