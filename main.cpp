@@ -474,11 +474,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	scissorRect.bottom = kClientHeight;
 
 	//
-	const int kSize = 51;
+	const int kParticleSize = 51;
 
 	// 定数バッファの準備（行列用）
-	std::vector<ID3D12Resource*> wvpResources(kSize); // 三角形の数だけ用意
-	std::vector<TransformationMatrix*> wvpData(kSize);
+	//三角形の数だけ用意
+	std::vector<ID3D12Resource*> wvpResources(kParticleSize);
+	std::vector<TransformationMatrix*> wvpData(kParticleSize);
 
 	for (size_t i = 0; i < wvpResources.size(); i++) {
 		wvpResources[i] = CreateBufferResource(device, sizeof(TransformationMatrix));
@@ -487,30 +488,32 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		wvpData[i]->World = MakeIdentity4x4();
 	}
 
-	// 定数バッファの準備（色用）
-	std::vector<ID3D12Resource*> colorResources(kSize); // 三角形の数だけ用意
-	std::vector<Vector4*> colorData(kSize);
+	//定数バッファの準備（色用）
+	//三角形の数だけ用意
+	std::vector<ID3D12Resource*> colorResources(kParticleSize);
+	std::vector<Vector4*> colorData(kParticleSize);
 
 	for (size_t i = 0; i < colorResources.size(); i++) {
 		colorResources[i] = CreateBufferResource(device, sizeof(VertexData));
 		colorResources[i]->Map(0, nullptr, reinterpret_cast<void**>(&colorData[i]));
-		*colorData[i] = Vector4(1.0f, 1.0f, 1.0f, 1.0f); // 初期化（白色）
+		//初期化（白色）
+		*colorData[i] = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
 	}
 	//Transform変数を作る
-	Transform transforms[kSize] = {};
+	Transform transforms[kParticleSize] = {};
 	Transform sliderTransform{};
-	Vector3 initialPositions[kSize]{};
-	Vector3 initialScales[kSize]{};
-	for (int i = 0; i < kSize; i++) {
+	Vector3 initialPositions[kParticleSize]{};
+	Vector3 initialScales[kParticleSize]{};
+	for (int i = 0; i < kParticleSize; i++) {
 		transforms[i] = { { 0.5f, 0.5f, 0.5f }, { 0.0f,0.0f,0.0f }, { 0.0f,0.0f,0.0f } };
 	}
 	//ランダムの回転用と座標用とスピード
-	Vector3 randRad[kSize]{};
+	Vector3 randRad[kParticleSize]{};
 	Vector3 randTranslate{};
-	float randSpeedY[kSize]{};
+	float randSpeedY[kParticleSize]{};
 	//パーティクルを管理するフラグ
-	bool isParticle[kSize]{};
-	bool isSTOP = false;
+	bool isParticle[kParticleSize]{};
+	bool isParticleStop = false;
 	//Camera変数を作る
 	Transform cameraTransform{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,-10.0f} };
 
@@ -586,7 +589,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			ImGui::Checkbox("Texture", &textureResource_->GetTextureSwitch());
 			//ImGui::TreeNode();
 			if (ImGui::DragFloat3("objScale Data", &sliderTransform.scale.x, 0.001f)) {
-				for (int i = 0; i < kSize; i++) {
+				for (int i = 0; i < kParticleSize; i++) {
 					initialScales[i] = transforms[i].scale;
 					Vector3 newScale = Add(initialScales[i], sliderTransform.scale);
 					transforms[i].scale = newScale;
@@ -594,7 +597,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 				sliderTransform.scale = Vector3{ 0,0,0 };
 			}
 			if (ImGui::DragFloat3("objTranslate Data", &sliderTransform.translate.x, 0.001f)) {
-				for (int i = 0; i < kSize; i++) {
+				for (int i = 0; i < kParticleSize; i++) {
 					initialPositions[i] = transforms[i].translate;
 					Vector3 newPosition = Add(initialPositions[i], sliderTransform.translate);
 					transforms[i].translate = newPosition;
@@ -603,7 +606,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			}
 			ImGui::ColorEdit3("DirectionalLightData.Color", &directionalLightData->color.x);
 			ImGui::DragFloat3("DirectionalLightData.Direction", &directionalLightData->direction.x, 0.01f);
-			ImGui::Checkbox("STOP", &isSTOP);
+			ImGui::Checkbox("ParticleStop", &isParticleStop);
 			ImGui::End();
 			ImGui::Begin("CameraTransform");
 			ImGui::DragFloat3("CameraRotate", &cameraTransform.rotate.x, 0.01f);
@@ -624,7 +627,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 			// ここでプリミティブトポロジを設定
 			commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-			for (int i = 0; i < kSize; i++) {
+			for (int i = 0; i < kParticleSize; i++) {
 				// Transformの更新（適宜変更）
 				if (!isParticle[i]) {
 					randTranslate.x = (rand() % 81 - 40) * 0.1f;
@@ -647,7 +650,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 					};
 				}
 			}
-			for (int i = 0; i < kSize; i++) {
+			for (int i = 0; i < kParticleSize; i++) {
 				Matrix4x4 worldMatrix = MakeAfineMatrix(transforms[i].scale, transforms[i].rotate, transforms[i].translate);
 				Matrix4x4 cameraMatrix = MakeAfineMatrix(cameraTransform.scale, cameraTransform.rotate, cameraTransform.translate);
 				Matrix4x4 viewMatrix = Inverse(cameraMatrix);
@@ -699,8 +702,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			assert(SUCCEEDED(hr));
 			hr = commandList->Reset(commandAllocator, nullptr);
 			assert(SUCCEEDED(hr));
-			if (!isSTOP) {
-				for (int i = 0; i < kSize; i++) {
+			if (!isParticleStop) {
+				for (int i = 0; i < kParticleSize; i++) {
 					if (isParticle) {
 						transforms[i].translate.y -= randSpeedY[i];
 						transforms[i].rotate.x += randRad[i].x;
@@ -750,7 +753,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		rootSignature->Release();
 		pixelShaderBlob->Release();
 		vertexShaderBlob->Release();
-		for (int i = 0; i < kSize; i++) {
+		for (int i = 0; i < kParticleSize; i++) {
 			//materislResource->Release();
 			colorResources[i]->Release();
 			wvpResources[i]->Release();
