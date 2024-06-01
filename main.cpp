@@ -501,19 +501,23 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	}
 	//Transform変数を作る
 	Transform transforms[kParticleSize] = {};
-	Transform sliderTransform{};
-	Vector3 initialPositions[kParticleSize]{};
-	Vector3 initialScales[kParticleSize]{};
 	for (int i = 0; i < kParticleSize; i++) {
 		transforms[i] = { { 0.5f, 0.5f, 0.5f }, { 0.0f,0.0f,0.0f }, { 0.0f,0.0f,0.0f } };
 	}
+	//ImGuiで動かす数値
+	Transform sliderTransform{};
+	//保存しておく初期値
+	Transform initialTransform[kParticleSize]{};
 	//ランダムの回転用と座標用とスピード
-	Vector3 randRad[kParticleSize]{};
+	Vector3 randRotate[kParticleSize]{};
 	Vector3 randTranslate{};
+	Vector4 particleRandomColor[kParticleSize]{};
+	Vector4 particleColor{ 1.0f,1.0f,1.0f,1.0f };
 	float randSpeedY[kParticleSize]{};
 	//パーティクルを管理するフラグ
 	bool isParticle[kParticleSize]{};
 	bool isParticleStop = false;
+	bool isParticleRandomColor = true;
 	//Camera変数を作る
 	Transform cameraTransform{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,-10.0f} };
 
@@ -586,27 +590,37 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			//開発用UIの処理.
 			ImGui::ShowDemoWindow();
 			ImGui::Begin("Window");
-			ImGui::Checkbox("Texture", &textureResource_->GetTextureSwitch());
 			//ImGui::TreeNode();
-			if (ImGui::DragFloat3("objScale Data", &sliderTransform.scale.x, 0.001f)) {
+			if (ImGui::DragFloat3("objScale", &sliderTransform.scale.x, 0.001f)) {
 				for (int i = 0; i < kParticleSize; i++) {
-					initialScales[i] = transforms[i].scale;
-					Vector3 newScale = Add(initialScales[i], sliderTransform.scale);
+					initialTransform[i].scale = transforms[i].scale;
+					Vector3 newScale = Add(initialTransform[i].scale, sliderTransform.scale);
 					transforms[i].scale = newScale;
 				}
 				sliderTransform.scale = Vector3{ 0,0,0 };
 			}
-			if (ImGui::DragFloat3("objTranslate Data", &sliderTransform.translate.x, 0.001f)) {
+			if (ImGui::DragFloat3("objRotate", &sliderTransform.rotate.x, 0.001f)) {
 				for (int i = 0; i < kParticleSize; i++) {
-					initialPositions[i] = transforms[i].translate;
-					Vector3 newPosition = Add(initialPositions[i], sliderTransform.translate);
+					initialTransform[i].rotate = transforms[i].rotate;
+					Vector3 newRotate = Add(initialTransform[i].rotate, sliderTransform.rotate);
+					transforms[i].rotate = newRotate;
+				}
+				sliderTransform.rotate = Vector3{ 0,0,0 };
+			}
+			if (ImGui::DragFloat3("objTranslate", &sliderTransform.translate.x, 0.001f)) {
+				for (int i = 0; i < kParticleSize; i++) {
+					initialTransform[i].translate = transforms[i].translate;
+					Vector3 newPosition = Add(initialTransform[i].translate, sliderTransform.translate);
 					transforms[i].translate = newPosition;
 				}
 				sliderTransform.translate = Vector3{ 0,0,0 };
 			}
+			ImGui::ColorEdit3("ParticleColor", &particleColor.x);
+			ImGui::Checkbox("ParticleRandomColor", &isParticleRandomColor);
+			ImGui::Checkbox("ParticleStop", &isParticleStop);
+			ImGui::Checkbox("Texture", &textureResource_->GetTextureSwitch());
 			ImGui::ColorEdit3("DirectionalLightData.Color", &directionalLightData->color.x);
 			ImGui::DragFloat3("DirectionalLightData.Direction", &directionalLightData->direction.x, 0.01f);
-			ImGui::Checkbox("ParticleStop", &isParticleStop);
 			ImGui::End();
 			ImGui::Begin("CameraTransform");
 			ImGui::DragFloat3("CameraRotate", &cameraTransform.rotate.x, 0.01f);
@@ -633,16 +647,17 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 					randTranslate.x = (rand() % 81 - 40) * 0.1f;
 					randTranslate.y = (rand() % 10 + 4) * 0.5f;
 					randTranslate.z = (rand() % 21 - 5) * 0.5f;
-					randRad[i].x = (rand() % 3 + 1) * 0.005f;
-					randRad[i].y = (rand() % 3 + 1) * 0.01f;
-					randRad[i].z = (rand() % 3 + 1) * 0.005f;
+					randRotate[i].x = (rand() % 3 + 1) * 0.005f;
+					randRotate[i].y = (rand() % 3 + 1) * 0.01f;
+					randRotate[i].z = (rand() % 3 + 1) * 0.005f;
 					if (rand() % 2 == 0) {
-						randRad[i].y *= -1.0f;
+						randRotate[i].y *= -1.0f;
 					}
 					randSpeedY[i] = (rand() % 5 + 1) * 0.01f;
 					isParticle[i] = true;
 					transforms[i].translate = randTranslate;
-					*colorData[i] = Vector4{
+					*colorData[i] = particleRandomColor[i] =
+					Vector4{
 						(rand() % 256) / 255.0f,
 						(rand() % 256) / 255.0f,
 						(rand() % 256) / 255.0f,
@@ -702,17 +717,23 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			assert(SUCCEEDED(hr));
 			hr = commandList->Reset(commandAllocator, nullptr);
 			assert(SUCCEEDED(hr));
-			if (!isParticleStop) {
-				for (int i = 0; i < kParticleSize; i++) {
+			for (int i = 0; i < kParticleSize; i++) {
+				if (!isParticleStop) {
 					if (isParticle) {
 						transforms[i].translate.y -= randSpeedY[i];
-						transforms[i].rotate.x += randRad[i].x;
-						transforms[i].rotate.y += randRad[i].y;
-						transforms[i].rotate.z += randRad[i].z;
+						transforms[i].rotate.x += randRotate[i].x;
+						transforms[i].rotate.y += randRotate[i].y;
+						transforms[i].rotate.z += randRotate[i].z;
 					}
 					if (transforms[i].translate.y < -3.0f) {
 						isParticle[i] = false;
 					}
+				}
+				if (isParticleRandomColor) {
+					*colorData[i] = particleRandomColor[i];
+				}
+				else {
+					*colorData[i] = particleColor;
 				}
 			}
 			directionalLightData->direction = Normalize(directionalLightData->direction);
