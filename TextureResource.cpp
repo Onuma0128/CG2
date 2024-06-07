@@ -20,7 +20,7 @@ void TextureResource::Initialize(ID3D12Device* device, ID3D12DescriptorHeap* srv
 	//SRVの生成
 	device->CreateShaderResourceView(textureResource, &srvDesc, textureSrvHandleCPU);
 	//２枚目のTextureを読んで転送する
-	DirectX::ScratchImage mipImages2 = LoadTexture(modelData_.material.textureFilePath);
+	DirectX::ScratchImage mipImages2 = LoadTexture("resources/monsterBall.png");
 	const DirectX::TexMetadata& metadata2 = mipImages2.GetMetadata();
 	textureResource2 = CreateTextureResource(device, metadata2);
 	UploadTextureData(textureResource2, mipImages2);
@@ -34,11 +34,6 @@ void TextureResource::Initialize(ID3D12Device* device, ID3D12DescriptorHeap* srv
 	textureSrvHandleGPU2 = GetGPUDescriptorHandle(srvDescriptorHeap, descriptorSizeSRV, 2);
 	//SRVの作成
 	device->CreateShaderResourceView(textureResource2, &srvDesc2, textureSrvHandleCPU2);
-}
-
-void TextureResource::SetModelData(ModelData modelData)
-{
-	modelData_ = modelData;
 }
 
 void TextureResource::Release()

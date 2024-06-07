@@ -406,7 +406,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	//TextureResourceを作る
 	TextureResource* textureResource_ = new TextureResource();
-	textureResource_->SetModelData(vertexResource_->GetModelData());
 	textureResource_->Initialize(device, srvDescriptorHeap, descriptorSizeSRV);
 
 	//DepthStencilTextureをウィンドウのサイズで作成
@@ -484,7 +483,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			//Lightの描画
 			commandList->SetGraphicsRootConstantBufferView(3, vertexResource_->GetDirectionalLightResource()->GetGPUVirtualAddress());
 			//描画
-			commandList->DrawInstanced(UINT(vertexResource_->GetModelData().vertices.size()), 1, 0, 0);
+			commandList->DrawInstanced(1536, 1, 0, 0);
 			//Spriteの描画
 			commandList->IASetVertexBuffers(0, 1, &vertexResource_->GetVertexBufferViewSprite());
 			commandList->IASetIndexBuffer(&vertexResource_->GetIndexBufferViewSprite());

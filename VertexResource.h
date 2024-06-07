@@ -15,7 +15,6 @@ public:
 	void Initialize(ID3D12Device* device);
 
 	void Update();
-	ModelData& GetModelData() { return modelData; }
 	D3D12_VERTEX_BUFFER_VIEW& GetVertexBufferView() { return vertexBufferView; }
 	D3D12_VERTEX_BUFFER_VIEW& GetVertexBufferViewSprite() { return vertexBufferViewSprite; }
 	D3D12_INDEX_BUFFER_VIEW& GetIndexBufferViewSprite() { return indexBufferViewSprite; }
@@ -29,8 +28,6 @@ public:
 
 	void Release();
 private:
-	//モデル読み込み
-	ModelData modelData;
 	//実際に頂点リソースを作る
 	ID3D12Resource* vertexResource = nullptr;
 	//Sprite用の頂点リソースを作る

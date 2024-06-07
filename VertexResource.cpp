@@ -3,10 +3,8 @@
 
 void VertexResource::Initialize(ID3D12Device* device)
 {
-	modelData = LoadObjFile("resources", "multiMesh.obj");
 	//実際に頂点リソースを作る
-	//vertexResource = CreateBufferResource(device, sizeof(VertexData) * 1536);
-	vertexResource = CreateBufferResource(device, sizeof(VertexData) * modelData.vertices.size());
+	vertexResource = CreateBufferResource(device, sizeof(VertexData) * 1536);
 	//Sprite用の頂点リソースを作る
 	vertexResourceSprite = CreateBufferResource(device, sizeof(VertexData) * 4);
 	indexResourceSprite = CreateBufferResource(device, sizeof(uint32_t) * 6);
@@ -19,8 +17,7 @@ void VertexResource::Initialize(ID3D12Device* device)
 	indexBufferViewSprite.BufferLocation = indexResourceSprite->GetGPUVirtualAddress();
 	directionalLightBufferView.BufferLocation = directionalLightResource->GetGPUVirtualAddress();
 	//使用するリソースのサイズは頂点3つ分のサイズ
-	//vertexBufferView.SizeInBytes = sizeof(VertexData) * 1536;
-	vertexBufferView.SizeInBytes = UINT(sizeof(VertexData) * modelData.vertices.size());
+	vertexBufferView.SizeInBytes = sizeof(VertexData) * 1536;
 	vertexBufferViewSprite.SizeInBytes = sizeof(VertexData) * 4;
 	indexBufferViewSprite.SizeInBytes = sizeof(uint32_t) * 6;
 	directionalLightBufferView.SizeInBytes = sizeof(DirectionalLight);
@@ -32,12 +29,11 @@ void VertexResource::Initialize(ID3D12Device* device)
 	//Resourceにデータを書き込む
 	//書き込むためのアドレスを取得
 	vertexResource->Map(0, nullptr, reinterpret_cast<void**>(&vertexData));
-	//vertexData = DrawSphere(vertexData, vertexCount);
-	////法線情報の追加
-	//for (uint32_t index = 0; index < 1536; ++index) {
-	//	vertexData[index].normal = Normalize(vertexData[index].position);
-	//}
-	std::memcpy(vertexData, modelData.vertices.data(), sizeof(VertexData) * modelData.vertices.size());
+	vertexData = DrawSphere(vertexData, vertexCount);
+	//法線情報の追加
+	for (uint32_t index = 0; index < 1536; ++index) {
+		vertexData[index].normal = Normalize(vertexData[index].position);
+	}
 	//書き込むためのアドレスを取得
 	vertexResourceSprite->Map(0, nullptr, reinterpret_cast<void**>(&vertexDataSprite));
 	//四角形の4つの頂点
@@ -59,7 +55,7 @@ void VertexResource::Initialize(ID3D12Device* device)
 	directionalLightResource->Map(0, nullptr, reinterpret_cast<void**>(&directionalLightData));
 	//デフォルト値はとりあえず以下のようにする
 	directionalLightData->color = { 1.0f,1.0f,1.0f,1.0f };
-	directionalLightData->direction = { 0.0f,1.0f,0.0f };
+	directionalLightData->direction = { 0.0f,1.0f,-1.0f };
 	directionalLightData->direction = Normalize(directionalLightData->direction);
 	directionalLightData->intensity = 1.0f;
 
