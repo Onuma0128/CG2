@@ -406,6 +406,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	//TextureResourceを作る
 	TextureResource* textureResource_ = new TextureResource();
+	textureResource_->SetModelData(vertexResource_->GetModelData());
 	textureResource_->Initialize(device, srvDescriptorHeap, descriptorSizeSRV);
 
 	//DepthStencilTextureをウィンドウのサイズで作成
@@ -483,7 +484,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			//Lightの描画
 			commandList->SetGraphicsRootConstantBufferView(3, vertexResource_->GetDirectionalLightResource()->GetGPUVirtualAddress());
 			//描画
-			commandList->DrawInstanced(1536, 1, 0, 0);
+			commandList->DrawInstanced(UINT(vertexResource_->GetModelData().vertices.size()), 1, 0, 0);
 			//Spriteの描画
 			commandList->IASetVertexBuffers(0, 1, &vertexResource_->GetVertexBufferViewSprite());
 			commandList->IASetIndexBuffer(&vertexResource_->GetIndexBufferViewSprite());
@@ -491,8 +492,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			commandList->SetGraphicsRootConstantBufferView(0, vertexResource_->GetMaterialResourceSprite()->GetGPUVirtualAddress());
 			commandList->SetGraphicsRootConstantBufferView(1, vertexResource_->GetTransformationMatrixResourceSprite()->GetGPUVirtualAddress());
 			commandList->SetGraphicsRootDescriptorTable(2, textureResource_->GetTextureSrvHandleGPU());
-			//描画
-			commandList->DrawInstanced(4, 1, 0, 0);
+			//スプライトの描画
 			commandList->DrawIndexedInstanced(6, 1, 0, 0, 0);
 			//実際のnommandListのImGuiの描画コマンドを積む
 			ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), commandList);

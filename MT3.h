@@ -1,5 +1,6 @@
 #pragma once
-#include <stdint.h>
+#include <vector>
+#include <xstring>
 
 struct Vector2 {
 	float x;
@@ -31,6 +32,13 @@ struct VertexData {
 	Vector4 position;
 	Vector2 texcoord;
 	Vector3 normal;
+};
+struct MaterialData {
+	std::string textureFilePath;
+};
+struct ModelData {
+	std::vector<VertexData> vertices;
+	MaterialData material;
 };
 struct Sphere {
 	Vector3 center;

@@ -2,6 +2,7 @@
 #include "LoadTexture.h"
 #include "DescriptorHeap.h"
 #include "DepthStencilTexture.h"
+#include "MT3.h"
 
 class TextureResource
 {
@@ -9,6 +10,7 @@ public:
 	void Initialize(ID3D12Device* device,ID3D12DescriptorHeap* srvDescriptorHeap, const uint32_t& descriptorSizeSRV);
 
 	bool& GetuseMonsterBall() { return useMonsterBall; }
+	void SetModelData(ModelData modelData);
 	D3D12_GPU_DESCRIPTOR_HANDLE GetTextureSrvHandleGPU() { return textureSrvHandleGPU; }
 	D3D12_GPU_DESCRIPTOR_HANDLE GetTextureSrvHandleGPU2() { return textureSrvHandleGPU2; }
 
@@ -17,6 +19,7 @@ public:
 private:
 	ID3D12Resource* textureResource = nullptr;
 	ID3D12Resource* textureResource2 = nullptr;
+	ModelData modelData_{};
 	//metaDataを基にSRVの設定
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc2{};
