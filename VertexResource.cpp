@@ -3,7 +3,7 @@
 
 void VertexResource::Initialize(ID3D12Device* device)
 {
-	modelData = LoadObjFile("resources", "multiMesh.obj");
+	modelData = LoadObjFile("resources", "axis.obj");
 	//実際に頂点リソースを作る
 	//vertexResource = CreateBufferResource(device, sizeof(VertexData) * 1536);
 	vertexResource = CreateBufferResource(device, sizeof(VertexData) * modelData.vertices.size());
