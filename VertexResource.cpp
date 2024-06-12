@@ -91,6 +91,13 @@ void VertexResource::Initialize(ID3D12Device* device)
 	wvpData->World = MakeIdentity4x4();
 	transformationMatrixDataSprite->WVP = MakeIdentity4x4();
 	transformationMatrixDataSprite->World = MakeIdentity4x4();
+
+	cameraDistance = 10.0f;
+	cameraHorizontalAngle = -1.575f;
+	cameraVerticalAngle = 0.26f;
+
+	cameraTarget = { 0.0f, 0.0f, 0.0f }; // カメラが見るターゲット（原点）
+	up = { 0.0f, 1.0f, 0.0f }; // 上方向
 }
 
 void VertexResource::Update()
@@ -111,11 +118,23 @@ void VertexResource::Update()
 	uvTransformMatrix = Multiply(uvTransformMatrix, MakeRotateZMatrix(uvTransformSprite.rotate.z));
 	uvTransformMatrix = Multiply(uvTransformMatrix, MakeTranslateMatrix(uvTransformSprite.translate));
 	materialDataSprite->uvTransform = uvTransformMatrix;
-	//Camera変換
-	Matrix4x4 cameraMatrix = MakeAfineMatrix(cameraTransform.scale, cameraTransform.rotate, cameraTransform.translate);
-	Matrix4x4 viewMatrix = Inverse(cameraMatrix);
-	Matrix4x4 projectionMatrix = MakePerspectiveFovMatrix(0.45f, float(kClientWidth) / float(kClientHeight), 0.1f, 100.0f);
+	////Camera変換
+	//Matrix4x4 cameraMatrix = MakeAfineMatrix(cameraTransform.scale, cameraTransform.rotate, cameraTransform.translate);
+	//Matrix4x4 viewMatrix = Inverse(cameraMatrix);
+	//Matrix4x4 projectionMatrix = MakePerspectiveFovMatrix(0.45f, float(kClientWidth) / float(kClientHeight), 0.1f, 100.0f);
+	//Matrix4x4 worldViewProjectionMatrix = Multiply(worldMatrix, Multiply(viewMatrix, projectionMatrix));
+
+	// カメラ位置の更新（球面座標系から直交座標系への変換）
+	cameraTransform.translate.x = cameraDistance * std::cosf(cameraVerticalAngle) * std::cosf(cameraHorizontalAngle);
+	cameraTransform.translate.y = cameraDistance * std::sinf(cameraVerticalAngle);
+	cameraTransform.translate.z = cameraDistance * std::cosf(cameraVerticalAngle) * std::sinf(cameraHorizontalAngle);
+
+	// ビュー行列の計算
+	Matrix4x4 viewMatrix = MakeLookAtMatrix(cameraTransform.translate, cameraTarget, up);
+	Matrix4x4 projectionMatrix = MakePerspectiveFovMatrix(0.1f, float(kClientWidth) / float(kClientHeight), 0.1f, 100.0f);
+	//Matrix4x4 cameraWorldMatrix = MakeAfineMatrix(traiangleScale, traiangleRotate, traiangleTranslate);
 	Matrix4x4 worldViewProjectionMatrix = Multiply(worldMatrix, Multiply(viewMatrix, projectionMatrix));
+
 	wvpData->WVP = worldViewProjectionMatrix;
 	wvpData->World = worldViewProjectionMatrix;
 	//LightのNormalize
@@ -141,6 +160,13 @@ void VertexResource::ImGui(bool& useMonsterBall)
 	ImGui::DragFloat2("UVTranslate", &uvTransformSprite.translate.x, 0.01f, -10.0f, 10.0f);
 	ImGui::DragFloat2("UVScale", &uvTransformSprite.scale.x, 0.01f, -10.0f, 10.0f);
 	ImGui::SliderAngle("UVRotate", &uvTransformSprite.rotate.z);
+	ImGui::End();
+
+	ImGui::Begin("Camera");
+	ImGui::Text("cameraPosition.x %f", cameraTransform.translate.x);
+	ImGui::DragFloat("CameraDistance", &cameraDistance, 0.01f);
+	ImGui::DragFloat("CameraHorizontalAngle", &cameraHorizontalAngle, 0.01f);
+	ImGui::DragFloat("CameraVerticalAngle", &cameraVerticalAngle, 0.01f);
 	ImGui::End();
 }
 

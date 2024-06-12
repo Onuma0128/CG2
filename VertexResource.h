@@ -63,10 +63,17 @@ private:
 	TransformationMatrix* transformationMatrixDataSprite = nullptr;
 
 	//Transform変数を作る
-	Transform transform{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
+	Transform transform{ {0.3f,0.3f,0.3f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
 	Transform transformSprite{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
 	//Camera変数を作る
 	Transform cameraTransform{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,-10.0f} };
+	// カメラが見るターゲット（原点）
+	Vector3 cameraTarget;
+	// 上方向
+	Vector3 up; 
+	float cameraDistance;
+	float cameraHorizontalAngle;
+	float cameraVerticalAngle;
 	//UVTransform変数
 	Transform uvTransformSprite{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
 	Matrix4x4 uvTransformMatrix{};

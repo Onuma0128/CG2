@@ -66,6 +66,10 @@ const int32_t kClientHeight = 720;
 
 //単位行列
 Matrix4x4 MakeIdentity4x4();
+// 減算
+Vector3 Subtract(const Vector3& v1, const Vector3& v2);
+// 内積
+float Dot(const Vector3& v1, const Vector3& v2);
 // 正規化
 Vector3 Normalize(const Vector3& v);
 // 正規化
@@ -82,6 +86,10 @@ Matrix4x4 MakeRotateZMatrix(float radian);
 //移動行列
 Matrix4x4 MakeTranslateMatrix(const Vector3& translate);
 
+// 座標変換
+Vector3 Transform_(const Vector3& vector, const Matrix4x4& matrix);
+// クロス積
+Vector3 Cross(const Vector3& v1, const Vector3& v2);
 // 行列の積
 Matrix4x4 Multiply(const Matrix4x4& m1, const Matrix4x4& m2);
 // 3次元アフィン変換
@@ -93,6 +101,10 @@ Matrix4x4 Inverse(const Matrix4x4& m);
 Matrix4x4 MakePerspectiveFovMatrix(float fovY, float aspecRatio, float nearClip, float farClip);
 // 正射影行列
 Matrix4x4 MakeOrthographicMatrix(float left, float top, float right, float bottom, float nearClip, float farClip);
+// ビューポート変換行列
+Matrix4x4 MakeViewportMatrix(float left, float top, float width, float height, float minDepth, float maxDepth);
+// デバッグカメラ
+Matrix4x4 MakeLookAtMatrix(const Vector3& Position, const Vector3& target, const Vector3& up);
 
 //Sphere
 VertexData* DrawSphere(VertexData* vertexData, uint32_t kSubdivision);
