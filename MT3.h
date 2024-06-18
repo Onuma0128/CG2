@@ -66,8 +66,12 @@ const int32_t kClientHeight = 720;
 
 //単位行列
 Matrix4x4 MakeIdentity4x4();
+// 加算
+Vector3 Add(const Vector3& v1, const Vector3& v2);
 // 減算
 Vector3 Subtract(const Vector3& v1, const Vector3& v2);
+//ディスタンス
+float Distance(const Vector4& v1, const Vector3& v2);
 // 内積
 float Dot(const Vector3& v1, const Vector3& v2);
 // 正規化

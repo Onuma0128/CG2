@@ -14,12 +14,30 @@ Matrix4x4 MakeIdentity4x4()
 	return result;
 }
 
+Vector3 Add(const Vector3& v1, const Vector3& v2)
+{
+	Vector3 result{};
+	result.x = v1.x + v2.x;
+	result.y = v1.y + v2.y;
+	result.z = v1.z + v2.z;
+	return result;
+}
+
 Vector3 Subtract(const Vector3& v1, const Vector3& v2) {
 	Vector3 result{};
 	result.x = v1.x - v2.x;
 	result.y = v1.y - v2.y;
 	result.z = v1.z - v2.z;
 	return result;
+}
+
+float Distance(const Vector4& v1, const Vector3& v2)
+{
+	float dx = v2.x - v1.x;
+	float dy = v2.y - v1.y;
+	float dz = v2.z - v1.z;
+
+	return std::sqrtf(dx * dx + dy * dy + dz * dz);
 }
 
 float Dot(const Vector3& v1, const Vector3& v2) {
