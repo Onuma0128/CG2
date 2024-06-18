@@ -250,6 +250,20 @@ void VertexResource::Update()
 		sphereVelocity = { 0.0f,0.0f,0.0f };
 		sphereFalling = false;
 	}
+	if (gridInitialize) {
+		for (int z = 0; z < gridSize; ++z) {
+			for (int x = 0; x < gridSize; ++x) {
+				int index = z * gridSize + x;
+				vertexDataGrid[index].position = { (x - gridSize / 2.0f) * 0.1f, -1.0f, (z - gridSize / 2.0f) * 0.1f, 1.0f };
+				waveAmplitude[index] = 0.0f; // 波の振幅を初期化
+				waveTime[index] = -20.0f; // 波の時間を初期化（-1は未初期化を意味する）
+			}
+		}
+		wavePropagationSpeed = 3.0f;
+		waveAttenuationValue = 0.3f;
+		gridInitialize = false;
+	}
+
 }
 
 bool VertexResource::onCollision(Transform& Sphere, VertexData* Grid)
@@ -328,6 +342,7 @@ void VertexResource::ImGui(bool& useMonsterBall)
 	ImGui::DragFloat3("GridTranslate", &transformGrid.translate.x, 0.01f);
 	ImGui::SliderFloat("waveSpeed", &wavePropagationSpeed, 0.01f, 10.0f, "%.2f");
 	ImGui::SliderFloat("waveAttenuation", &waveAttenuationValue, 0.0f, 1.0f, "%.2f");
+	ImGui::Checkbox("gridInitialize", &gridInitialize);
 	ImGui::End();
 
 	/*ImGui::Begin("Sprite");
