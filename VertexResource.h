@@ -90,7 +90,7 @@ private:
 
 	//Transform変数を作る
 	//球体
-	Transform transform{ {0.3f,0.3f,0.3f},{0.0f,0.0f,0.0f},{0.0f,0.5f,0.0f} };
+	Transform transform{ {0.3f,0.3f,0.3f},{0.0f,0.0f,0.0f},{0.0f,1.0f,0.0f} };
 	Vector3 sphereVelocity{};
 	Vector3 sphereAcceleration{};
 	//球体の落下フラグ

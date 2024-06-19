@@ -246,7 +246,7 @@ void VertexResource::Update()
 	}
 
 	if (transform.translate.y < -10.0f) {
-		transform.translate.y = 0.5f;
+		transform.translate.y = 1.0f;
 		sphereVelocity = { 0.0f,0.0f,0.0f };
 		sphereFalling = false;
 	}
@@ -315,7 +315,7 @@ void VertexResource::GenerateWave(Transform& Sphere, VertexData* Grid)
 			// 各グリッドの座標の波の振幅の初期化
 			// 波の振幅と時間を設定
 			waveAmplitude[index] = -std::sinf((distanceToCollision / Sphere.scale.y / 2.0f) * pi)
-				* (Sphere.scale.y + std::fabsf(sphereVelocity.y)) * attenuation; // 波の振幅
+				* (Sphere.scale.y + std::fabsf(sphereVelocity.y) * 1.5f) * attenuation; // 波の振幅
 			waveTime[index] = (-distanceToCollision / Sphere.scale.y) * (Sphere.scale.y / 2.0f) + std::fabs(sphereVelocity.y); // 波の伝播時間をリセット
 		}
 	}
@@ -329,10 +329,10 @@ void VertexResource::ImGui(bool& useMonsterBall)
 	ImGui::DragFloat3("Rotate", &transform.rotate.x, 0.01f);
 	ImGui::DragFloat3("Translate", &transform.translate.x, 0.01f);
 	ImGui::Checkbox("sphereFalling", &sphereFalling);
-	ImGui::DragFloat("Velocity", &sphereVelocity.y,0.01f);
+	ImGui::SliderFloat("Velocity", &sphereVelocity.y, -1.0f, 0.0f, "%.2f");
 	ImGui::Checkbox("useMonsterBall", &useMonsterBall);
-	/*ImGui::ColorEdit3("LightColor", (float*)&directionalLightData->color.x);
-	ImGui::DragFloat3("DirectionalLightData.Direction", &directionalLightData->direction.x, 0.01f);*/
+	ImGui::ColorEdit3("LightColor", (float*)&directionalLightData->color.x);
+	ImGui::DragFloat3("DirectionalLightData.Direction", &directionalLightData->direction.x, 0.01f);
 	ImGui::End();
 
 	ImGui::Begin("Grid");
