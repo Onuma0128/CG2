@@ -6,6 +6,7 @@
 #include "CompileShader.h"
 #include "TextureResource.h"
 #include "VertexResource.h"
+#include "ResourceObject.h"
 
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
