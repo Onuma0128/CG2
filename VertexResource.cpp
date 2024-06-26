@@ -135,7 +135,7 @@ void VertexResource::Initialize(ID3D12Device* device)
 	waveAttenuationValue = 0.3f;
 	//球体の速度
 	sphereVelocity = { 0.0f, 0.0f, 0.0f };
-	sphereAcceleration = { 0.0f, -0.01f, 0.0f };
+	sphereAcceleration = { 0.0f, -0.004f, 0.0f };
 }
 
 void VertexResource::CreateGrid()
@@ -310,12 +310,13 @@ void VertexResource::GenerateWave(Transform& Sphere, VertexData* Grid)
 			// 各グリッド点と接触地点との距離を計算
 			float distanceToCollision = Distance(Grid[index].position, collisionPoint);
 			// 減衰係数の計算（距離が増えると振幅が減少）
+			waveAttenuationValue = 0.5f - (transform.scale.y * 10.0f) * 0.02f + (sphereVelocity.y * 0.1f);
 			float attenuation = std::exp(-distanceToCollision * waveAttenuationValue);
 
 			// 各グリッドの座標の波の振幅の初期化
 			// 波の振幅と時間を設定
 			waveAmplitude[index] = -std::sinf((distanceToCollision / Sphere.scale.y / 2.0f) * pi)
-				* (Sphere.scale.y + std::fabsf(sphereVelocity.y) * 1.5f) * attenuation; // 波の振幅
+				* (Sphere.scale.y + std::fabsf(sphereVelocity.y)) * attenuation; // 波の振幅
 			waveTime[index] = (-distanceToCollision / Sphere.scale.y) * (Sphere.scale.y / 2.0f) + std::fabs(sphereVelocity.y); // 波の伝播時間をリセット
 		}
 	}
@@ -325,7 +326,7 @@ void VertexResource::ImGui(bool& useMonsterBall)
 {
 	ImGui::Begin("Sphere");
 	ImGui::ColorEdit3("Color", (float*)&materialData->color.x);
-	ImGui::DragFloat("Scale", &transform.scale.x, 0.01f);
+	ImGui::SliderFloat("Scale", &transform.scale.x, 0.1f, 1.0f, "%.2f");
 	ImGui::DragFloat3("Rotate", &transform.rotate.x, 0.01f);
 	ImGui::DragFloat3("Translate", &transform.translate.x, 0.01f);
 	ImGui::Checkbox("sphereFalling", &sphereFalling);
