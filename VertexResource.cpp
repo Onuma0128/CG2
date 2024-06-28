@@ -1,7 +1,7 @@
 #include "VertexResource.h"
 #include <cassert>
 
-void VertexResource::Initialize(ID3D12Device* device)
+void VertexResource::Initialize(ComPtr<ID3D12Device> device)
 {
 	modelData = LoadObjFile("resources", "axis.obj");
 	//実際に頂点リソースを作る
@@ -148,19 +148,7 @@ void VertexResource::ImGui(bool& useMonsterBall)
 	ImGui::End();
 }
 
-void VertexResource::Release()
-{
-	vertexResource->Release();
-	vertexResourceSprite->Release();
-	indexResourceSprite->Release();
-	directionalLightResource->Release();
-	materialResource->Release();
-	materialResourceSprite->Release();
-	wvpResource->Release();
-	transformationMatrixResourceSprite->Release();
-}
-
-ID3D12Resource* CreateBufferResource(ID3D12Device* device, size_t sizeInBytes)
+ComPtr<ID3D12Resource> CreateBufferResource(ComPtr<ID3D12Device> device, size_t sizeInBytes)
 {
 	// 頂点リソースのヒープの設定
 	D3D12_HEAP_PROPERTIES uploadHeapProperties = {};

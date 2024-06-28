@@ -6,38 +6,40 @@
 #include "externals/imgui/imgui_impl_win32.h"
 #include "MT3.h"
 #include "LoadObjFile.h"
+#include "wrl.h"
 
-ID3D12Resource* CreateBufferResource(ID3D12Device* device, size_t sizeInBytes);
+using Microsoft::WRL::ComPtr;
+
+ComPtr<ID3D12Resource> CreateBufferResource(ComPtr<ID3D12Device> device, size_t sizeInBytes);
 
 class VertexResource
 {
 public:
-	void Initialize(ID3D12Device* device);
+	void Initialize(ComPtr<ID3D12Device> device);
 
 	void Update();
 	ModelData& GetModelData() { return modelData; }
 	D3D12_VERTEX_BUFFER_VIEW& GetVertexBufferView() { return vertexBufferView; }
 	D3D12_VERTEX_BUFFER_VIEW& GetVertexBufferViewSprite() { return vertexBufferViewSprite; }
 	D3D12_INDEX_BUFFER_VIEW& GetIndexBufferViewSprite() { return indexBufferViewSprite; }
-	ID3D12Resource* GetDirectionalLightResource() { return directionalLightResource; }
-	ID3D12Resource* GetMaterialResource() { return materialResource; }
-	ID3D12Resource* GetMaterialResourceSprite() { return materialResourceSprite; }
-	ID3D12Resource* GetwvpResource() { return wvpResource; }
-	ID3D12Resource* GetTransformationMatrixResourceSprite() { return transformationMatrixResourceSprite; }
+	ComPtr<ID3D12Resource> GetDirectionalLightResource() { return directionalLightResource; }
+	ComPtr<ID3D12Resource> GetMaterialResource() { return materialResource; }
+	ComPtr<ID3D12Resource> GetMaterialResourceSprite() { return materialResourceSprite; }
+	ComPtr<ID3D12Resource> GetwvpResource() { return wvpResource; }
+	ComPtr<ID3D12Resource> GetTransformationMatrixResourceSprite() { return transformationMatrixResourceSprite; }
 
 	void ImGui(bool& useMonsterBall);
 
-	void Release();
 private:
 	//モデル読み込み
 	ModelData modelData;
 	//実際に頂点リソースを作る
-	ID3D12Resource* vertexResource = nullptr;
+	ComPtr<ID3D12Resource> vertexResource = nullptr;
 	//Sprite用の頂点リソースを作る
-	ID3D12Resource* vertexResourceSprite = nullptr;
-	ID3D12Resource* indexResourceSprite = nullptr;
+	ComPtr<ID3D12Resource> vertexResourceSprite = nullptr;
+	ComPtr<ID3D12Resource> indexResourceSprite = nullptr;
 	//平行光源用のリソースを作る
-	ID3D12Resource* directionalLightResource = nullptr;
+	ComPtr<ID3D12Resource> directionalLightResource = nullptr;
 	//VertexBufferViewを作成する
 	//頂点バッファビューを作成する
 	D3D12_VERTEX_BUFFER_VIEW vertexBufferView{};
@@ -52,15 +54,15 @@ private:
 	//分割数
 	uint32_t vertexCount = 16;
 	//マテリアル用のリソースを作る
-	ID3D12Resource* materialResource = nullptr;
-	ID3D12Resource* materialResourceSprite = nullptr;
+	ComPtr<ID3D12Resource> materialResource = nullptr;
+	ComPtr<ID3D12Resource> materialResourceSprite = nullptr;
 	//マテリアルにデータを書き込む
 	Material* materialData = nullptr;
 	Material* materialDataSprite = nullptr;
 	//WVP用のリソースを作る
-	ID3D12Resource* wvpResource = nullptr;
+	ComPtr<ID3D12Resource> wvpResource = nullptr;
 	//Sprite用
-	ID3D12Resource* transformationMatrixResourceSprite = nullptr;
+	ComPtr<ID3D12Resource> transformationMatrixResourceSprite = nullptr;
 	//データを書き込む
 	TransformationMatrix* wvpData = nullptr;
 	TransformationMatrix* transformationMatrixDataSprite = nullptr;

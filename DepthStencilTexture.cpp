@@ -1,7 +1,7 @@
 #include "DepthStencilTexture.h"
 #include <assert.h>
 
-ID3D12Resource* CreateDepthStencilTextureResource(ID3D12Device* device, int width, int height)
+ComPtr<ID3D12Resource> CreateDepthStencilTextureResource(ComPtr<ID3D12Device> device, int width, int height)
 {
 	//生成するResourceの設定
 	D3D12_RESOURCE_DESC resourceDesc{};

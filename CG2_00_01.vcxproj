@@ -115,7 +115,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="LoadTexture.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MT3.cpp" />
-    <ClCompile Include="ResourceObject.cpp" />
     <ClCompile Include="TextureResource.cpp" />
     <ClCompile Include="VertexResource.cpp" />
   </ItemGroup>
@@ -148,7 +147,6 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="LoadObjFile.h" />
     <ClInclude Include="LoadTexture.h" />
     <ClInclude Include="MT3.h" />
-    <ClInclude Include="ResourceObject.h" />
     <ClInclude Include="TextureResource.h" />
     <ClInclude Include="VertexResource.h" />
   </ItemGroup>

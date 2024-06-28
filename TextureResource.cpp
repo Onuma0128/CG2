@@ -1,6 +1,6 @@
 #include "TextureResource.h"
 
-void TextureResource::Initialize(ID3D12Device* device, ID3D12DescriptorHeap* srvDescriptorHeap, const uint32_t& descriptorSizeSRV)
+void TextureResource::Initialize(ComPtr<ID3D12Device> device, ComPtr<ID3D12DescriptorHeap> srvDescriptorHeap, const uint32_t& descriptorSizeSRV)
 {
 	DirectX::ScratchImage mipImages = LoadTexture("resources/uvChecker.png");
 	const DirectX::TexMetadata& metadata = mipImages.GetMetadata();
@@ -18,7 +18,7 @@ void TextureResource::Initialize(ID3D12Device* device, ID3D12DescriptorHeap* srv
 	textureSrvHandleCPU.ptr += device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 	textureSrvHandleGPU.ptr += device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 	//SRVの生成
-	device->CreateShaderResourceView(textureResource, &srvDesc, textureSrvHandleCPU);
+	device->CreateShaderResourceView(textureResource.Get(), &srvDesc, textureSrvHandleCPU);
 	//２枚目のTextureを読んで転送する
 	DirectX::ScratchImage mipImages2 = LoadTexture(modelData_.material.textureFilePath);
 	const DirectX::TexMetadata& metadata2 = mipImages2.GetMetadata();
@@ -33,16 +33,10 @@ void TextureResource::Initialize(ID3D12Device* device, ID3D12DescriptorHeap* srv
 	textureSrvHandleCPU2 = GetCPUDescriptorHandle(srvDescriptorHeap, descriptorSizeSRV, 2);
 	textureSrvHandleGPU2 = GetGPUDescriptorHandle(srvDescriptorHeap, descriptorSizeSRV, 2);
 	//SRVの作成
-	device->CreateShaderResourceView(textureResource2, &srvDesc2, textureSrvHandleCPU2);
+	device->CreateShaderResourceView(textureResource2.Get(), &srvDesc2, textureSrvHandleCPU2);
 }
 
 void TextureResource::SetModelData(ModelData modelData)
 {
 	modelData_ = modelData;
-}
-
-void TextureResource::Release()
-{
-	textureResource->Release();
-	textureResource2->Release();
 }

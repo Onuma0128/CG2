@@ -20,15 +20,15 @@ void Log(const std::string& message) {
 }
 
 //CompileShader関数
-IDxcBlob* CompileShader(
+ComPtr<IDxcBlob> CompileShader(
 	//CompilerするShaderファイルへのパス
 	const std::wstring& filePath,
 	//Compilerに使用するProfile
 	const wchar_t* profile,
 	//初期化で生成したものを3つ
-	IDxcUtils* dxcUtils,
-	IDxcCompiler3* dxcCompiler,
-	IDxcIncludeHandler* includeHandler)
+	ComPtr<IDxcUtils> dxcUtils,
+	ComPtr<IDxcCompiler3> dxcCompiler,
+	ComPtr<IDxcIncludeHandler> includeHandler)
 {
 	//ここの中身をこの後書いて行く
 	// 1
@@ -59,7 +59,7 @@ IDxcBlob* CompileShader(
 		&shaderSourceBuffer, //読み込んだファイル
 		arguments,           //コンパイルオプション
 		_countof(arguments), //コンパイルオプションの数
-		includeHandler,      //includeが含まれた諸々
+		includeHandler.Get(),      //includeが含まれた諸々
 		IID_PPV_ARGS(&shaderResult)//コンパイル結果
 	);
 	//コンパイルエラーではなくdxc画起動できないなど致命的な状況
