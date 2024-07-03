@@ -499,6 +499,20 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			commandList->SetGraphicsRootConstantBufferView(3, vertexResource_->GetDirectionalLightResource()->GetGPUVirtualAddress());
 			//描画
 			commandList->DrawInstanced(UINT(vertexResource_->GetModelData().vertices.size()), 1, 0, 0);
+
+			//Sphereの描画
+			commandList->IASetVertexBuffers(0, 1, &vertexResource_->GetVertexBufferViewSphere());
+			//マテリアルCBufferの場所を設定
+			commandList->SetGraphicsRootConstantBufferView(0, vertexResource_->GetMaterialResourceSphere()->GetGPUVirtualAddress());
+			//wvp用のCBufferの場所を設定
+			commandList->SetGraphicsRootConstantBufferView(1, vertexResource_->GetwvpResourceSphere()->GetGPUVirtualAddress());
+			//SRVのDescriptorTableの先頭を設定。2はrootParameter[2]である
+			commandList->SetGraphicsRootDescriptorTable(2, textureResource_->GetTextureSrvHandleGPU());
+			//Lightの描画
+			commandList->SetGraphicsRootConstantBufferView(3, vertexResource_->GetDirectionalLightResource()->GetGPUVirtualAddress());
+			//描画
+			commandList->DrawInstanced(1536, 1, 0, 0);
+
 			//Spriteの描画
 			commandList->IASetVertexBuffers(0, 1, &vertexResource_->GetVertexBufferViewSprite());
 			commandList->IASetIndexBuffer(&vertexResource_->GetIndexBufferViewSprite());
