@@ -132,13 +132,11 @@ void VertexResource::Update()
 void VertexResource::ImGui(bool& useMonsterBall)
 {
 	ImGui::Begin("Window");
-	ImGui::ColorEdit3("Color", (float*)&materialData_->color.x);
+	ImGui::ColorEdit4("Color", (float*)&materialData_->color.x);
 	ImGui::DragFloat3("Scale", &transform_.scale.x, 0.01f);
 	ImGui::DragFloat3("Rotate", &transform_.rotate.x, 0.01f);
 	ImGui::DragFloat3("Translate", &transform_.translate.x, 0.01f);
 	ImGui::Checkbox("useMonsterBall", &useMonsterBall);
-	ImGui::ColorEdit3("LightColor", (float*)&directionalLightData_->color.x);
-	ImGui::DragFloat3("DirectionalLightData.Direction", &directionalLightData_->direction.x, 0.01f);
 	ImGui::End();
 
 	ImGui::Begin("Sprite");
@@ -153,6 +151,9 @@ void VertexResource::ImGui(bool& useMonsterBall)
 	ImGui::Begin("Camera");
 	ImGui::DragFloat3("cameraRotate", &cameraTransform.rotate.x, 0.01f);
 	ImGui::DragFloat3("cameraTranslate", &cameraTransform.translate.x, 0.01f);
+	ImGui::ColorEdit4("LightColor", (float*)&directionalLightData_->color.x);
+	ImGui::DragFloat3("DirectionalLightData.Direction", &directionalLightData_->direction.x, 0.01f);
+	ImGui::DragFloat("Intensity", &directionalLightData_->intensity, 0.01f);
 	ImGui::End();
 }
 
