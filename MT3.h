@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 #include <xstring>
+#include <random>
 
 struct Vector2 {
 	float x;
@@ -59,10 +60,31 @@ struct DirectionalLight {
 	Vector3 direction;
 	float intensity;
 };
+struct Particle {
+	Transform transform;
+	Vector3 velocity;
+	Vector4 color;
+	float lifeTime;
+	float currentTime;
+};
+struct ParticleForGPU {
+	Matrix4x4 WVP;
+	Matrix4x4 World;
+	Vector4 color;
+};
+
 const float pi = 3.141592653589793238462643383279f;
 //クライアント領域のサイズ
 const int32_t kClientWidth = 1280;
 const int32_t kClientHeight = 720;
+
+// 加算
+Vector3 Add(const Vector3& v1, const Vector3& v2);
+// 減算
+Vector3 Subtract(const Vector3& v1, const Vector3& v2);
+// スカラー倍
+Vector3 Multiply(float scalar, const Vector3& v);
+
 
 //単位行列
 Matrix4x4 MakeIdentity4x4();
@@ -96,3 +118,16 @@ Matrix4x4 MakeOrthographicMatrix(float left, float top, float right, float botto
 
 //Sphere
 VertexData* DrawSphere(VertexData* vertexData, uint32_t kSubdivision);
+//Particle生成関数
+Particle MakeNewParticle(std::mt19937& randomEngine);
+
+
+//単項演算子
+Vector3 operator+(const Vector3& v);
+Vector3 operator-(const Vector3& v);
+
+//二項演算子
+Vector3 operator+(const Vector3& v1, const Vector3& v2);
+Vector3 operator-(const Vector3& v1, const Vector3& v2);
+Vector3 operator*(float s, const Vector3& v);
+Vector3 operator*(const Vector3& v, float s);

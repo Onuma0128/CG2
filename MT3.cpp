@@ -2,6 +2,31 @@
 #include <cmath>
 #include <vector>
 
+Vector3 Add(const Vector3& v1, const Vector3& v2) {
+	Vector3 result{};
+	result.x = v1.x + v2.x;
+	result.y = v1.y + v2.y;
+	result.z = v1.z + v2.z;
+	return result;
+}
+
+Vector3 Subtract(const Vector3& v1, const Vector3& v2) {
+	Vector3 result{};
+	result.x = v1.x - v2.x;
+	result.y = v1.y - v2.y;
+	result.z = v1.z - v2.z;
+	return result;
+}
+
+Vector3 Multiply(float scalar, const Vector3& v) {
+	Vector3 result{};
+	result.x = v.x * scalar;
+	result.y = v.y * scalar;
+	result.z = v.z * scalar;
+	return result;
+}
+
+
 Matrix4x4 MakeIdentity4x4()
 {
 	Matrix4x4 result{
@@ -242,3 +267,27 @@ VertexData* DrawSphere(VertexData* vertexData, uint32_t kSubdivision) {
 	}
 	return vertexData;
 }
+
+Particle MakeNewParticle(std::mt19937& randomEngine)
+{
+	std::uniform_real_distribution<float> distribution(-1.0f, 1.0f);
+	std::uniform_real_distribution<float> distColor(0.0f, 1.0f);
+	std::uniform_real_distribution<float> distTime(1.0f, 3.0f);
+	Particle particle{};
+	particle.transform.scale = { 1.0f,1.0f,1.0f };
+	particle.transform.rotate = { 0.0f,0.0f,0.0f };
+	particle.transform.translate = { distribution(randomEngine),distribution(randomEngine) ,distribution(randomEngine) };
+	particle.velocity = { distribution(randomEngine),distribution(randomEngine) ,distribution(randomEngine) };
+	particle.color = { distColor(randomEngine),distColor(randomEngine) ,distColor(randomEngine) ,1.0f };
+	particle.lifeTime = distTime(randomEngine);
+	particle.currentTime = 0.0f;
+	return particle;
+}
+
+Vector3 operator+(const Vector3& v1, const Vector3& v2) { return Add(v1, v2); }
+Vector3 operator-(const Vector3& v1, const Vector3& v2) { return Subtract(v1, v2); }
+Vector3 operator*(float s, const Vector3& v) { return Multiply(s, v); }
+Vector3 operator*(const Vector3& v, float s) { return s * v; }
+
+Vector3 operator+(const Vector3& v) { return v; }
+Vector3 operator-(const Vector3& v) { return { -v.x, -v.y, -v.z }; }

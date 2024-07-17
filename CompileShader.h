@@ -3,6 +3,8 @@
 #include <string>
 #include <format>
 #include <cassert>
+#include <d3d12.h>
+#pragma comment(lib,"d3d12.lib")
 #include <dxcapi.h>
 #pragma comment(lib,"dxcompiler.lib")
 #include "wrl.h"
@@ -24,3 +26,5 @@ ComPtr<IDxcBlob> CompileShader(
 	ComPtr<IDxcUtils> dxcUtils,
 	ComPtr<IDxcCompiler3> dxcCompiler,
 	ComPtr<IDxcIncludeHandler> includeHandler);
+
+void CreateNewPipelineState(ComPtr<ID3D12Device>& device, ComPtr<ID3D12RootSignature>& newRootSignature, ComPtr<ID3D12PipelineState>& newPipelineState, ComPtr<IDxcUtils> dxcUtils, ComPtr<IDxcCompiler3> dxcCompiler, ComPtr<IDxcIncludeHandler> includeHandler);
