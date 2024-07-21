@@ -109,8 +109,14 @@ void VertexResource::Initialize(ComPtr<ID3D12Device> device)
 
 	std::mt19937 randomEngine_(seedGenerator_());
 
+	emitter_.transform = { {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
+	emitter_.frequency = 0.5f;
+	emitter_.frequencyTime = 0.0f;
+	// emitter_.frequencyごとに出すパーティクルの個数
+	emitter_.count = 3;
+	particles_.splice(particles_.end(), Emit(emitter_, randomEngine_));
+
 	for (uint32_t index = 0; index < kNumMaxInstance; ++index) {
-		particles_[index] = MakeNewParticle(randomEngine_);
 		instancingData_[index].WVP = MakeIdentity4x4();
 		instancingData_[index].World = MakeIdentity4x4();
 	}
@@ -124,30 +130,44 @@ void VertexResource::Update()
 	Matrix4x4 projectionMatrix = MakePerspectiveFovMatrix(0.45f, float(kClientWidth) / float(kClientHeight), 0.1f, 100.0f);
 	Matrix4x4 viewMatrix = Inverse(cameraMatrix);
 
+	// エミッターによるパーティクルの発生
+	if (moveStart) {
+		emitter_.frequencyTime += kDeltaTime;
+	}
+	if (emitter_.frequency <= emitter_.frequencyTime) {
+		std::mt19937 randomEngine_(seedGenerator_());
+		particles_.splice(particles_.end(), Emit(emitter_, randomEngine_));
+		emitter_.frequencyTime -= emitter_.frequency;
+	}
+
+	// パーティクルの更新
 	numInstance = 0;
-	//Transform変換
-	for (uint32_t index = 0; index < kNumMaxInstance; ++index) {
-		if (particles_[index].lifeTime <= particles_[index].currentTime) {
+	for (std::list<Particle>::iterator particleIterator = particles_.begin();
+		particleIterator != particles_.end();) {
+		if ((*particleIterator).lifeTime <= (*particleIterator).currentTime) {
+			particleIterator = particles_.erase(particleIterator);
 			continue;
 		}
-		Matrix4x4 worldMatrix = MakeAfineMatrix(particles_[index].transform.scale, particles_[index].transform.rotate, particles_[index].transform.translate);
+		Matrix4x4 backToFrontMatrix = MakeRotateYMatrix(std::numbers::pi_v<float>);
+		Matrix4x4 billboardMatrix = Multiply(backToFrontMatrix, cameraMatrix);
+		billboardMatrix.m[3][0] = 0.0f; billboardMatrix.m[3][1] = 0.0f; billboardMatrix.m[3][2] = 0.0f;
+		Matrix4x4 worldMatrix = MakeScaleMatrix(particleIterator->transform.scale) * billboardMatrix * MakeTranslateMatrix(particleIterator->transform.translate);
 		Matrix4x4 worldViewMatrix = Multiply(worldMatrix, viewMatrix);
 		Matrix4x4 worldViewProjectionMatrix = Multiply(worldViewMatrix, projectionMatrix);
 		//パーティクルの動き
 		if (moveStart) {
-			particles_[index].transform.translate = particles_[index].velocity * kDeltaTime + particles_[index].transform.translate;
-			particles_[index].currentTime += kDeltaTime;
+			particleIterator->transform.translate = particleIterator->velocity * kDeltaTime + particleIterator->transform.translate;
+			particleIterator->currentTime += kDeltaTime;
 		}
-		instancingData_[numInstance].WVP = worldViewProjectionMatrix;
-		instancingData_[numInstance].World = worldViewMatrix;
-		instancingData_[numInstance].color = particles_[index].color;
-		float alpha = 1.0f - (particles_[index].currentTime / particles_[index].lifeTime);
-		instancingData_[numInstance].color.w = alpha;
-		if (alpha <= 0.0f) {
-			std::mt19937 randomEngine_(seedGenerator_());
-			particles_[index] = MakeNewParticle(randomEngine_);
+		float alpha = 1.0f - (particleIterator->currentTime / particleIterator->lifeTime);
+		if (numInstance < kNumMaxInstance) {
+			instancingData_[numInstance].WVP = worldViewProjectionMatrix;
+			instancingData_[numInstance].World = worldViewMatrix;
+			instancingData_[numInstance].color = particleIterator->color;
+			instancingData_[numInstance].color.w = alpha;
+			++numInstance;
 		}
-		++numInstance;
+		++particleIterator;
 	}
 
 	//Sprite用
@@ -187,10 +207,18 @@ void VertexResource::ImGui(bool& useMonsterBall)
 	ImGui::DragFloat("Intensity", &directionalLightData_->intensity, 0.01f);
 	ImGui::End();
 
+	uint32_t min = 0;uint32_t max = 20;
 	ImGui::Begin("Settings");
+	ImGui::SliderScalar("Emitter_count", ImGuiDataType_U32, &emitter_.count, &min, &max);
+	ImGui::DragFloat3("EmitterTranslate", &emitter_.transform.translate.x, 0.01f, -100.0f, 100.0f);
 	ImGui::ColorEdit4("Color", (float*)&materialData_->color.x);
 	ImGui::Checkbox("circle", &useMonsterBall);
 	ImGui::Checkbox("move", &moveStart);
+	ImGui::Text("%d", numInstance);
+	if (ImGui::Button("Add Particle")) {
+		std::mt19937 randomEngine_(seedGenerator_());
+		particles_.splice(particles_.end(), Emit(emitter_, randomEngine_));
+	}
 	ImGui::End();
 }
 

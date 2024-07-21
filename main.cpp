@@ -541,10 +541,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			//コマンドを積む
 			commandList->RSSetViewports(1, &viewport);
 			commandList->RSSetScissorRects(1, &scissorRect);
-			//RootSignatureを設定。PSOに設定しているけど別途設定が必要
+			///==============================================================================================
+			//RootSignatureを設定。PSOに設定しているけど別途設定が必要(Particle.hlsl)
 			commandList->SetGraphicsRootSignature(rootSignature.Get());
 			commandList->SetPipelineState(graphicsPipelineState.Get());
 			commandList->IASetVertexBuffers(0, 1, &vertexResource_->GetVertexBufferView());
+			///==============================================================================================
 			//形状を設定。PSOに設定しているものとはまた別。同じものを設定すると考えて置けばいい
 			commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 			//マテリアルCBufferの場所を設定
@@ -559,9 +561,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			commandList->SetGraphicsRootDescriptorTable(4, instancingSrvHandleGPU);
 			//描画
 			commandList->DrawInstanced(UINT(vertexResource_->GetModelData().vertices.size()), vertexResource_->GetNumInstance(), 0, 0);
-			// 新しいパイプラインステートを設定
+			///==============================================================================================
+			// 新しいパイプラインステートを設定(Object3d.hlsl)
 			commandList->SetGraphicsRootSignature(newRootSignature.Get());
 			commandList->SetPipelineState(newPipelineState.Get());
+			///==============================================================================================
 			//Spriteの描画
 			commandList->IASetVertexBuffers(0, 1, &vertexResource_->GetVertexBufferViewSprite());
 			commandList->IASetIndexBuffer(&vertexResource_->GetIndexBufferViewSprite());

@@ -9,10 +9,12 @@
 #include "wrl.h"
 #include <iostream>
 #include <random>
+#include <numbers>
+#include <list>
 
 using Microsoft::WRL::ComPtr;
 
-const uint32_t kNumMaxInstance = 40;
+const uint32_t kNumMaxInstance = 100;
 
 ComPtr<ID3D12Resource> CreateBufferResource(ComPtr<ID3D12Device> device, size_t sizeInBytes);
 
@@ -89,7 +91,8 @@ private:
 	///=================================================================
 
 	//Transform変数を作る
-	Particle particles_[kNumMaxInstance];
+	std::list<Particle> particles_;
+	Emitter emitter_{};
 	const float kDeltaTime = 1.0f / 60.0f;
 	uint32_t numInstance = 0;
 	//乱数生成器の初期化
