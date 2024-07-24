@@ -26,5 +26,3 @@ ComPtr<IDxcBlob> CompileShader(
 	ComPtr<IDxcUtils> dxcUtils,
 	ComPtr<IDxcCompiler3> dxcCompiler,
 	ComPtr<IDxcIncludeHandler> includeHandler);
-
-void CreateNewPipelineState(ComPtr<ID3D12Device>& device, ComPtr<ID3D12RootSignature>& newRootSignature, ComPtr<ID3D12PipelineState>& newPipelineState, ComPtr<IDxcUtils> dxcUtils, ComPtr<IDxcCompiler3> dxcCompiler, ComPtr<IDxcIncludeHandler> includeHandler);
