@@ -15,8 +15,8 @@ public:
 
 private:
 	ComPtr<ID3D12Device> device_ = {};
-	ComPtr<ID3D12DescriptorHeap> srvDescriptorHeap_;
-	uint32_t descriptorSizeSRV_;
+	ComPtr<ID3D12DescriptorHeap> srvDescriptorHeap_{};
+	uint32_t descriptorSizeSRV_{};
 
 	ComPtr<ID3D12Resource> textureResource_ = nullptr;
 

@@ -97,7 +97,7 @@ private:
 	uint32_t numInstance = 0;
 	//乱数生成器の初期化
 	std::random_device seedGenerator_;
-	bool moveStart;
+	bool moveStart = false;
 
 	Transform transformSprite{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
 	//Camera変数を作る
