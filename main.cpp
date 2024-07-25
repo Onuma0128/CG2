@@ -292,8 +292,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	//TextureResourceを作る
 	TextureResource* textureResource_ = new TextureResource();
-	textureResource_->SetModelData(vertexResource_->GetModelData());
 	textureResource_->Initialize(device, srvDescriptorHeap, descriptorSizeSRV);
+	D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU[4]{
+		textureResource_->GetTextureSrvHandleGPU(vertexResource_->GetModelData().material.textureFilePath,1),
+		textureResource_->GetTextureSrvHandleGPU("resources/uvChecker.png",2),
+		textureResource_->GetTextureSrvHandleGPU("resources/checkerBoard.png",3),
+		textureResource_->GetTextureSrvHandleGPU("resources/circle.png",4)
+	};
 
 	//DepthStencilTextureをウィンドウのサイズで作成
 	ComPtr<ID3D12Resource> depthStencilResource = CreateDepthStencilTextureResource(device.Get(), kClientWidth, kClientHeight);
@@ -306,7 +311,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//DSVHeapの先頭にDSVを作る
 	device->CreateDepthStencilView(depthStencilResource.Get(), &dsvDesc, dsvDescriptorHeap->GetCPUDescriptorHandleForHeapStart());
 
-	uint32_t instanceCount = 10;
 
 	D3D12_SHADER_RESOURCE_VIEW_DESC instancingSrvDesc{};
 	instancingSrvDesc.Format = DXGI_FORMAT_UNKNOWN;
@@ -392,7 +396,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			//wvp用のCBufferの場所を設定
 			commandList->SetGraphicsRootConstantBufferView(1, vertexResource_->GetwvpResource()->GetGPUVirtualAddress());
 			//SRVのDescriptorTableの先頭を設定。2はrootParameter[2]である
-			commandList->SetGraphicsRootDescriptorTable(2, textureResource_->GetuseMonsterBall() ? textureResource_->GetTextureSrvHandleGPU2() : textureResource_->GetTextureSrvHandleGPU());
+			commandList->SetGraphicsRootDescriptorTable(2, textureResource_->GetuseMonsterBall() ? textureSrvHandleGPU[0] : textureSrvHandleGPU[3]);
 			//Lightの描画
 			commandList->SetGraphicsRootConstantBufferView(3, vertexResource_->GetDirectionalLightResource()->GetGPUVirtualAddress());
 			//instancing用のDataを読むためにStructuredBufferのSRVを設定
@@ -410,7 +414,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			//TransformtionMatrixCBufferの場所を設定
 			commandList->SetGraphicsRootConstantBufferView(0, vertexResource_->GetMaterialResourceSprite()->GetGPUVirtualAddress());
 			commandList->SetGraphicsRootConstantBufferView(1, vertexResource_->GetTransformationMatrixResourceSprite()->GetGPUVirtualAddress());
-			commandList->SetGraphicsRootDescriptorTable(2, textureResource_->GetTextureSrvHandleGPU2());
+			commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU[1]);
 			//スプライトの描画
 			commandList->DrawIndexedInstanced(6, 1, 0, 0, 0);
 			//実際のnommandListのImGuiの描画コマンドを積む

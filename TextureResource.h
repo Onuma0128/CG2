@@ -7,31 +7,29 @@
 class TextureResource
 {
 public:
-	void Initialize(ComPtr<ID3D12Device> device, ComPtr<ID3D12DescriptorHeap> srvDescriptorHeap, const uint32_t& descriptorSizeSRV);
+	void Initialize(ComPtr<ID3D12Device>& device, ComPtr<ID3D12DescriptorHeap> srvDescriptorHeap, const uint32_t& descriptorSizeSRV);
 
 	bool& GetuseMonsterBall() { return useMonsterBall; }
-	void SetModelData(ModelData modelData);
-	D3D12_GPU_DESCRIPTOR_HANDLE GetTextureSrvHandleGPU() { return textureSrvHandleGPU; }
-	D3D12_GPU_DESCRIPTOR_HANDLE GetTextureSrvHandleGPU2() { return textureSrvHandleGPU2; }
+
+	D3D12_GPU_DESCRIPTOR_HANDLE GetTextureSrvHandleGPU(const std::string& filePath,const uint32_t& index);
 
 private:
-	ModelData modelData_{};
-	ComPtr<ID3D12Resource> textureResource = nullptr;
-	ComPtr<ID3D12Resource> textureResource2 = nullptr;
+	ComPtr<ID3D12Device> device_ = {};
+	ComPtr<ID3D12DescriptorHeap> srvDescriptorHeap_;
+	uint32_t descriptorSizeSRV_;
+
+	ComPtr<ID3D12Resource> textureResource_ = nullptr;
 
 	///=============================================================================================================
 
 	//metaDataを基にSRVの設定
-	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
-	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc2{};
+	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc_{};
 
 	///=============================================================================================================
 
 	//SRVを制作するDescriptorHeapの場所を決める
-	D3D12_CPU_DESCRIPTOR_HANDLE textureSrvHandleCPU{};
-	D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU{};
-	D3D12_CPU_DESCRIPTOR_HANDLE textureSrvHandleCPU2{};
-	D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU2{};
+	D3D12_CPU_DESCRIPTOR_HANDLE textureSrvHandleCPU_{};
+	D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU_{};
 
 	///=============================================================================================================
 

@@ -4,6 +4,7 @@
 void VertexResource::Initialize(ComPtr<ID3D12Device> device)
 {
 	modelData_ = LoadObjFile("resources", "plane.obj");
+	//modelData_ = LoadObjFile("resources", "teapot.obj");
 	//modelData_ = LoadObjFile("resources", "bunny.obj");
 	//実際に頂点リソースを作る
 	vertexResource_ = CreateBufferResource(device, sizeof(VertexData) * modelData_.vertices.size());
