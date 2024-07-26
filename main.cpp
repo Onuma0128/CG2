@@ -408,6 +408,16 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			commandList->SetGraphicsRootSignature(object3dRootSignature.Get());
 			commandList->SetPipelineState(object3dPipelineState.Get());
 			///==============================================================================================
+
+			//Sphere
+			commandList->IASetVertexBuffers(0, 1, &vertexResource_->GetVertexBufferViewSphere());
+			commandList->SetGraphicsRootConstantBufferView(0, vertexResource_->GetMaterialResourceSphere()->GetGPUVirtualAddress());
+			commandList->SetGraphicsRootConstantBufferView(1, vertexResource_->GetwvpResourceSphere()->GetGPUVirtualAddress());
+			commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU[1]);
+			commandList->SetGraphicsRootConstantBufferView(3, vertexResource_->GetDirectionalLightResource()->GetGPUVirtualAddress());
+			//描画
+			commandList->DrawInstanced(1536, 1, 0, 0);
+
 			//Spriteの描画
 			commandList->IASetVertexBuffers(0, 1, &vertexResource_->GetVertexBufferViewSprite());
 			commandList->IASetIndexBuffer(&vertexResource_->GetIndexBufferViewSprite());

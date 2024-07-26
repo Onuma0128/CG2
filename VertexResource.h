@@ -27,14 +27,17 @@ public:
 	void Update();
 	ModelData& GetModelData() { return modelData_; }
 	D3D12_VERTEX_BUFFER_VIEW& GetVertexBufferView() { return vertexBufferView_; }
+	D3D12_VERTEX_BUFFER_VIEW& GetVertexBufferViewSphere() { return vertexBufferViewSphere_; }
 	D3D12_VERTEX_BUFFER_VIEW& GetVertexBufferViewSprite() { return vertexBufferViewSprite_; }
 	D3D12_INDEX_BUFFER_VIEW& GetIndexBufferViewSprite() { return indexBufferViewSprite_; }
 	ComPtr<ID3D12Resource> GetDirectionalLightResource() { return directionalLightResource_; }
 	ComPtr<ID3D12Resource> GetInstancingResource() { return instancingResource_; }
 
 	ComPtr<ID3D12Resource> GetMaterialResource() { return materialResource_; }
+	ComPtr<ID3D12Resource> GetMaterialResourceSphere() { return materialResourceSphere_; }
 	ComPtr<ID3D12Resource> GetMaterialResourceSprite() { return materialResourceSprite_; }
 	ComPtr<ID3D12Resource> GetwvpResource() { return wvpResource_; }
+	ComPtr<ID3D12Resource> GetwvpResourceSphere() { return wvpResourceSphere_; }
 	ComPtr<ID3D12Resource> GetTransformationMatrixResourceSprite() { return transformationMatrixResourceSprite_; }
 
 	void ImGui(bool& useMonsterBall);
@@ -44,6 +47,8 @@ private:
 	ModelData modelData_;
 	//実際に頂点リソースを作る
 	ComPtr<ID3D12Resource> vertexResource_ = nullptr;
+	//Sphere用の頂点リソースを作る
+	ComPtr<ID3D12Resource> vertexResourceSphere_ = nullptr;
 	//Sprite用の頂点リソースを作る
 	ComPtr<ID3D12Resource> vertexResourceSprite_ = nullptr;
 	ComPtr<ID3D12Resource> indexResourceSprite_ = nullptr;
@@ -57,6 +62,7 @@ private:
 	//VertexBufferViewを作成する
 	//頂点バッファビューを作成する
 	D3D12_VERTEX_BUFFER_VIEW vertexBufferView_{};
+	D3D12_VERTEX_BUFFER_VIEW vertexBufferViewSphere_{};
 	D3D12_VERTEX_BUFFER_VIEW vertexBufferViewSprite_{};
 	D3D12_INDEX_BUFFER_VIEW indexBufferViewSprite_{};
 	D3D12_VERTEX_BUFFER_VIEW directionalLightBufferView_{};
@@ -65,6 +71,7 @@ private:
 
 	//頂点リソースにデータを書き込む
 	VertexData* vertexData_ = nullptr;
+	VertexData* vertexDataSphere_ = nullptr;
 	VertexData* vertexDataSprite_ = nullptr;
 	uint32_t* indexDataSprite_ = nullptr;
 	DirectionalLight* directionalLightData_ = nullptr;
@@ -75,16 +82,21 @@ private:
 
 	//マテリアル用のリソースを作る
 	ComPtr<ID3D12Resource> materialResource_ = nullptr;
+	ComPtr<ID3D12Resource> materialResourceSphere_ = nullptr;
 	ComPtr<ID3D12Resource> materialResourceSprite_ = nullptr;
 	//マテリアルにデータを書き込む
 	Material* materialData_ = nullptr;
+	Material* materialDataSphere_ = nullptr;
 	Material* materialDataSprite_ = nullptr;
 	//WVP用のリソースを作る
 	ComPtr<ID3D12Resource> wvpResource_ = nullptr;
+	//Sphere用
+	ComPtr<ID3D12Resource> wvpResourceSphere_ = nullptr;
 	//Sprite用
 	ComPtr<ID3D12Resource> transformationMatrixResourceSprite_ = nullptr;
 	//データを書き込む
 	TransformationMatrix* wvpData_ = nullptr;
+	TransformationMatrix* wvpDataSphere_ = nullptr;
 	TransformationMatrix* transformationMatrixDataSprite_ = nullptr;
 	ParticleForGPU* instancingData_ = nullptr;
 
@@ -92,18 +104,21 @@ private:
 
 	//Transform変数を作る
 	std::list<Particle> particles_;
+	AccelerationField accelerationField_;
 	Emitter emitter_{};
 	const float kDeltaTime = 1.0f / 60.0f;
 	uint32_t numInstance = 0;
 	//乱数生成器の初期化
 	std::random_device seedGenerator_;
-	bool moveStart = false;
+	bool moveStart_ = false;
+	bool isFieldStart_ = false;
 
-	Transform transformSprite{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
+	Transform transformSphere_{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
+	Transform transformSprite_{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
 	//Camera変数を作る
-	Transform cameraTransform{ {1.0f,1.0f,1.0f},{0.35f,3.1f,0.0f},{0.0f,4.0f,10.0f} };
+	Transform cameraTransform_{ {1.0f,1.0f,1.0f},{0.16f,3.1f,0.0f},{0.0f,4.0f,30.0f} };
 	//UVTransform変数
-	Transform uvTransformSprite{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
-	Matrix4x4 uvTransformMatrix{};
+	Transform uvTransformSprite_{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
+	Matrix4x4 uvTransformMatrix_{};
 };
 

@@ -26,6 +26,10 @@ struct Matrix3x3 {
 struct Matrix4x4 {
 	float m[4][4];
 };
+struct AABB {
+	Vector3 min;
+	Vector3 max;
+};
 struct Transform {
 	Vector3 scale;
 	Vector3 rotate;
@@ -80,6 +84,13 @@ struct Emitter {
 	float frequency;
 	float frequencyTime;
 };
+struct AccelerationField {
+	Vector3 acceleration;
+	AABB area;
+};
+struct CameraForGPU {
+	Vector3 worldPosition;
+};
 
 const float pi = 3.141592653589793238462643383279f;
 //クライアント領域のサイズ
@@ -133,6 +144,8 @@ VertexData* DrawSphere(VertexData* vertexData, uint32_t kSubdivision);
 Particle MakeNewParticle(std::mt19937& randomEngine,const Vector3& translate);
 //Emit関数
 std::list<Particle> Emit(const Emitter& emitter, std::mt19937& randomEngine);
+// AABBとpoint
+bool IsCollision(const AABB& aabb, const Vector3& point);
 
 //単項演算子
 Vector3 operator+(const Vector3& v);

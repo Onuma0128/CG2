@@ -314,6 +314,16 @@ std::list<Particle> Emit(const Emitter& emitter, std::mt19937& randomEngine)
 	return particles;
 }
 
+bool IsCollision(const AABB& aabb, const Vector3& point)
+{
+	if (aabb.min.x < point.x && aabb.max.x > point.x && 
+		aabb.min.y < point.y && aabb.max.y > point.y &&
+		aabb.min.z < point.z && aabb.max.z > point.z) {
+		return true;
+	}
+	return false;
+}
+
 Vector3 operator+(const Vector3& v1, const Vector3& v2) { return Add(v1, v2); }
 Vector3 operator-(const Vector3& v1, const Vector3& v2) { return Subtract(v1, v2); }
 Vector3 operator*(float s, const Vector3& v) { return Multiply(s, v); }
