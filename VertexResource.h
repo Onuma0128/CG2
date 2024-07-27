@@ -39,6 +39,7 @@ public:
 	ComPtr<ID3D12Resource> GetwvpResource() { return wvpResource_; }
 	ComPtr<ID3D12Resource> GetwvpResourceSphere() { return wvpResourceSphere_; }
 	ComPtr<ID3D12Resource> GetTransformationMatrixResourceSprite() { return transformationMatrixResourceSprite_; }
+	ComPtr<ID3D12Resource> GetCameraResource() { return cameraResource_; }
 
 	void ImGui(bool& useMonsterBall);
 
@@ -94,11 +95,14 @@ private:
 	ComPtr<ID3D12Resource> wvpResourceSphere_ = nullptr;
 	//Sprite用
 	ComPtr<ID3D12Resource> transformationMatrixResourceSprite_ = nullptr;
+	//
+	ComPtr<ID3D12Resource> cameraResource_ = nullptr;
 	//データを書き込む
 	TransformationMatrix* wvpData_ = nullptr;
 	TransformationMatrix* wvpDataSphere_ = nullptr;
 	TransformationMatrix* transformationMatrixDataSprite_ = nullptr;
 	ParticleForGPU* instancingData_ = nullptr;
+	CameraForGPU* cameraData_ = nullptr;
 
 	///=================================================================
 
@@ -116,7 +120,7 @@ private:
 	Transform transformSphere_{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
 	Transform transformSprite_{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
 	//Camera変数を作る
-	Transform cameraTransform_{ {1.0f,1.0f,1.0f},{0.16f,3.1f,0.0f},{0.0f,4.0f,30.0f} };
+	Transform cameraTransform_{ {1.0f,1.0f,1.0f},{0.16f,3.1f,0.0f},{0.0f,4.0f,10.0f} };
 	//UVTransform変数
 	Transform uvTransformSprite_{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
 	Matrix4x4 uvTransformMatrix_{};

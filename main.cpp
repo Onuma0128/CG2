@@ -328,10 +328,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	PipelineState* pipelineState_ = new PipelineState();
 	pipelineState_->Initialize(device, dxcUtils, dxcCompiler, includeHandler);
 	// Object3d
-	ComPtr<ID3D12RootSignature> object3dRootSignature = pipelineState_->CreateNewRootSignature();
+	ComPtr<ID3D12RootSignature> object3dRootSignature = pipelineState_->CreateObject3dRootSignature();
 	ComPtr<ID3D12PipelineState> object3dPipelineState = pipelineState_->CreateObject3dPipelineState();
 	// Particle
-	ComPtr<ID3D12RootSignature> ParticleRootSignature = pipelineState_->CreateNewRootSignature();
+	ComPtr<ID3D12RootSignature> ParticleRootSignature = pipelineState_->CreateParticleRootSignature();
 	ComPtr<ID3D12PipelineState> ParticlePipelineState = pipelineState_->CreateParticlePipelineState();
 
 	//ウィンドウの×ボタンが押されるまでループ
@@ -415,6 +415,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			commandList->SetGraphicsRootConstantBufferView(1, vertexResource_->GetwvpResourceSphere()->GetGPUVirtualAddress());
 			commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU[1]);
 			commandList->SetGraphicsRootConstantBufferView(3, vertexResource_->GetDirectionalLightResource()->GetGPUVirtualAddress());
+			commandList->SetGraphicsRootConstantBufferView(4, vertexResource_->GetCameraResource()->GetGPUVirtualAddress());
 			//描画
 			commandList->DrawInstanced(1536, 1, 0, 0);
 

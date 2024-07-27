@@ -18,7 +18,8 @@ public:
 		ComPtr<IDxcCompiler3> dxcCompiler, ComPtr<IDxcIncludeHandler> includeHandler);
 
 	// ルートシグネチャ
-	ComPtr<ID3D12RootSignature> CreateNewRootSignature();
+	ComPtr<ID3D12RootSignature> CreateObject3dRootSignature();
+	ComPtr<ID3D12RootSignature> CreateParticleRootSignature();
 	// インプットレイアウト
 	void Object3dInputLayout(D3D12_INPUT_ELEMENT_DESC* inputElementDescs, D3D12_INPUT_LAYOUT_DESC& inputLayoutDesc);
 	void ParticleInputLayout(D3D12_INPUT_ELEMENT_DESC* inputElementDescs, D3D12_INPUT_LAYOUT_DESC& inputLayoutDesc);

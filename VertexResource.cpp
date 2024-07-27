@@ -102,6 +102,7 @@ void VertexResource::Initialize(ComPtr<ID3D12Device> device)
 	materialDataSphere_->color = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
 	materialDataSphere_->enableLighting = true;
 	materialDataSphere_->uvTransform = MakeIdentity4x4();
+	materialDataSphere_->shininess = 0.1f;
 	//Sprite用のマテリアルリソースを作る
 	materialResourceSprite_ = CreateBufferResource(device, sizeof(Material));
 	//書き込むためのアドレスを取得
@@ -117,10 +118,12 @@ void VertexResource::Initialize(ComPtr<ID3D12Device> device)
 	wvpResource_ = CreateBufferResource(device, sizeof(Matrix4x4));
 	wvpResourceSphere_ = CreateBufferResource(device, sizeof(Matrix4x4));
 	transformationMatrixResourceSprite_ = CreateBufferResource(device, sizeof(Matrix4x4));
+	cameraResource_ = CreateBufferResource(device, sizeof(Vector3));
 	//書き込むためのアドレスを取得
 	wvpResource_->Map(0, nullptr, reinterpret_cast<void**>(&wvpData_));
 	wvpResourceSphere_->Map(0, nullptr, reinterpret_cast<void**>(&wvpDataSphere_));
 	transformationMatrixResourceSprite_->Map(0, nullptr, reinterpret_cast<void**>(&transformationMatrixDataSprite_));
+	cameraResource_->Map(0, nullptr, reinterpret_cast<void**>(&cameraData_));
 	//単位行列を書き込んでおく
 	wvpData_->WVP = MakeIdentity4x4();
 	wvpData_->World = MakeIdentity4x4();
@@ -128,6 +131,7 @@ void VertexResource::Initialize(ComPtr<ID3D12Device> device)
 	wvpDataSphere_->World = MakeIdentity4x4();
 	transformationMatrixDataSprite_->WVP = MakeIdentity4x4();
 	transformationMatrixDataSprite_->World = MakeIdentity4x4();
+	cameraData_->worldPosition = cameraTransform_.translate;
 
 	std::mt19937 randomEngine_(seedGenerator_());
 
@@ -155,6 +159,7 @@ void VertexResource::Update()
 	Matrix4x4 cameraMatrix = MakeAfineMatrix(cameraTransform_.scale, cameraTransform_.rotate, cameraTransform_.translate);
 	Matrix4x4 projectionMatrix = MakePerspectiveFovMatrix(0.45f, float(kClientWidth) / float(kClientHeight), 0.1f, 100.0f);
 	Matrix4x4 viewMatrix = Inverse(cameraMatrix);
+	cameraData_->worldPosition = cameraTransform_.translate;
 
 	// エミッターによるパーティクルの発生
 	if (moveStart_) {
