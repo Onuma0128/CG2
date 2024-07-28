@@ -120,7 +120,7 @@ private:
 	Transform transformSphere_{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
 	Transform transformSprite_{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
 	//Camera変数を作る
-	Transform cameraTransform_{ {1.0f,1.0f,1.0f},{0.16f,3.1f,0.0f},{0.0f,4.0f,10.0f} };
+	Transform cameraTransform_{ {1.0f,1.0f,1.0f},{0.26f,0.0f,0.0f},{0.0f,4.0f,-15.0f} };
 	//UVTransform変数
 	Transform uvTransformSprite_{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
 	Matrix4x4 uvTransformMatrix_{};

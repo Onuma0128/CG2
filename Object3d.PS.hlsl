@@ -30,22 +30,23 @@ struct PixelShaderOutput
 };
 
 PixelShaderOutput main(VertexShaderOutput input)
-{
+{    
     PixelShaderOutput output;
     float4 transformedUV = mul(float4(input.texcoord, 0.0f, 1.0f), gMaterial.uvTransform);
     float4 textureColor = gTexture.Sample(gSampler, transformedUV.xy);
+    float3 normal = normalize(input.normal);
     float3 toEye = normalize(gCamera.worldPosition - input.worldPosition);
-    float3 reflectLight = reflect(gDirectionalLight.direction, normalize(input.normal));
-    float RdotE = dot(reflectLight, toEye);
-    float specularPow = pow(saturate(RdotE), gMaterial.shininess);
+    float3 lightDir = normalize(gDirectionalLight.direction);
+    float3 reflectLight = reflect(-lightDir, normal);
+    float RdotE = max(dot(reflectLight, toEye), 0.0);
+    float specularPow = pow(RdotE, gMaterial.shininess);
+    
     if (gMaterial.enableLighting != 0)
     {
-        float NdotL = dot(normalize(input.normal), gDirectionalLight.direction);
-        float cos = pow(NdotL * 0.5f + 0.5f, 2.0f);
-        float3 diffuse =
-        gMaterial.color.rgb * textureColor.rgb * gDirectionalLight.color.rgb * cos * gDirectionalLight.intensity;
-        float3 specular =
-        gDirectionalLight.color.rgb * gDirectionalLight.intensity * specularPow * float3(1.0f, 1.0f, 1.0f);
+        float NdotL = (dot(normal, lightDir));
+         float cos = pow(NdotL * 0.5f + 0.5f, 2.0f);
+        float3 diffuse = gMaterial.color.rgb * textureColor.rgb * gDirectionalLight.color.rgb * cos * gDirectionalLight.intensity;
+        float3 specular = gDirectionalLight.color.rgb * gDirectionalLight.intensity * specularPow;
         
         output.color.rgb = diffuse + specular;
         output.color.a = gMaterial.color.a * textureColor.a;
@@ -54,15 +55,8 @@ PixelShaderOutput main(VertexShaderOutput input)
     {
         output.color = gMaterial.color * textureColor;
     }
-    if (textureColor.a == 0.0f)
-    {
-        discard;
-    }
-    if (textureColor.a <= 0.5f)
-    {
-        discard;
-    }
-    if (output.color.a == 0.0f)
+
+    if (textureColor.a == 0.0f || textureColor.a <= 0.5f || output.color.a == 0.0f)
     {
         discard;
     }

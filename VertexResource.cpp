@@ -76,7 +76,6 @@ void VertexResource::Initialize(ComPtr<ID3D12Device> device)
 	//デフォルト値はとりあえず以下のようにする
 	directionalLightData_->color = { 1.0f,1.0f,1.0f,1.0f };
 	directionalLightData_->direction = { 0.0f,1.0f,0.0f };
-	directionalLightData_->direction = Normalize(directionalLightData_->direction);
 	directionalLightData_->intensity = 1.0f;
 
 	instancingResource_->Map(0, nullptr, reinterpret_cast<void**>(&instancingData_));
@@ -102,7 +101,7 @@ void VertexResource::Initialize(ComPtr<ID3D12Device> device)
 	materialDataSphere_->color = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
 	materialDataSphere_->enableLighting = true;
 	materialDataSphere_->uvTransform = MakeIdentity4x4();
-	materialDataSphere_->shininess = 0.1f;
+	materialDataSphere_->shininess = 64.0f;
 	//Sprite用のマテリアルリソースを作る
 	materialResourceSprite_ = CreateBufferResource(device, sizeof(Material));
 	//書き込むためのアドレスを取得
@@ -231,6 +230,13 @@ void VertexResource::Update()
 
 void VertexResource::ImGui(bool& useMonsterBall)
 {
+	ImGui::Begin("Sphere");
+	ImGui::DragFloat3("SphereScale", &transformSphere_.scale.x, 0.01f);
+	ImGui::DragFloat3("SphereRotate", &transformSphere_.rotate.x, 0.01f);
+	ImGui::DragFloat3("SphereTranslate", &transformSphere_.translate.x, 0.01f);
+	ImGui::Checkbox("MonsterBall", &useMonsterBall);
+	ImGui::End();
+
 	ImGui::Begin("Sprite");
 	ImGui::DragFloat3("Scale", &transformSprite_.scale.x, 0.01f);
 	ImGui::DragFloat3("Rotate", &transformSprite_.rotate.x, 0.01f);
@@ -243,6 +249,7 @@ void VertexResource::ImGui(bool& useMonsterBall)
 	ImGui::Begin("Camera");
 	ImGui::DragFloat3("cameraRotate", &cameraTransform_.rotate.x, 0.01f);
 	ImGui::DragFloat3("cameraTranslate", &cameraTransform_.translate.x, 0.01f);
+	ImGui::Text("cameraWorldPosition %f,%f,%f", cameraData_->worldPosition.x, cameraData_->worldPosition.y, cameraData_->worldPosition.z);
 	ImGui::ColorEdit4("LightColor", (float*)&directionalLightData_->color.x);
 	ImGui::DragFloat3("DirectionalLightData.Direction", &directionalLightData_->direction.x, 0.01f);
 	ImGui::DragFloat("Intensity", &directionalLightData_->intensity, 0.01f);
@@ -253,7 +260,6 @@ void VertexResource::ImGui(bool& useMonsterBall)
 	ImGui::SliderScalar("Emitter_count", ImGuiDataType_U32, &emitter_.count, &min, &max);
 	ImGui::DragFloat3("EmitterTranslate", &emitter_.transform.translate.x, 0.01f, -100.0f, 100.0f);
 	ImGui::ColorEdit4("Color", (float*)&materialData_->color.x);
-	ImGui::Checkbox("circle", &useMonsterBall);
 	ImGui::Checkbox("move", &moveStart_);
 	ImGui::Checkbox("field", &isFieldStart_);
 	ImGui::Text("%d", numInstance);

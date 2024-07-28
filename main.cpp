@@ -293,11 +293,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//TextureResourceを作る
 	TextureResource* textureResource_ = new TextureResource();
 	textureResource_->Initialize(device, srvDescriptorHeap, descriptorSizeSRV);
-	D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU[4]{
+	D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU[5]{
 		textureResource_->GetTextureSrvHandleGPU(vertexResource_->GetModelData().material.textureFilePath,1),
 		textureResource_->GetTextureSrvHandleGPU("resources/uvChecker.png",2),
 		textureResource_->GetTextureSrvHandleGPU("resources/checkerBoard.png",3),
-		textureResource_->GetTextureSrvHandleGPU("resources/circle.png",4)
+		textureResource_->GetTextureSrvHandleGPU("resources/circle.png",4),
+		textureResource_->GetTextureSrvHandleGPU("resources/monsterBall.png",5)
 	};
 
 	//DepthStencilTextureをウィンドウのサイズで作成
@@ -320,8 +321,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	instancingSrvDesc.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
 	instancingSrvDesc.Buffer.NumElements = kNumMaxInstance;
 	instancingSrvDesc.Buffer.StructureByteStride = sizeof(ParticleForGPU);
-	D3D12_CPU_DESCRIPTOR_HANDLE instancingSrvHandleCPU = GetCPUDescriptorHandle(srvDescriptorHeap, descriptorSizeSRV, 5);
-	D3D12_GPU_DESCRIPTOR_HANDLE instancingSrvHandleGPU = GetGPUDescriptorHandle(srvDescriptorHeap, descriptorSizeSRV, 5);
+	D3D12_CPU_DESCRIPTOR_HANDLE instancingSrvHandleCPU = GetCPUDescriptorHandle(srvDescriptorHeap, descriptorSizeSRV, 6);
+	D3D12_GPU_DESCRIPTOR_HANDLE instancingSrvHandleGPU = GetGPUDescriptorHandle(srvDescriptorHeap, descriptorSizeSRV, 6);
 	device->CreateShaderResourceView(vertexResource_->GetInstancingResource().Get(), &instancingSrvDesc, instancingSrvHandleCPU);
 
 	// 新しいパイプライン
@@ -396,7 +397,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			//wvp用のCBufferの場所を設定
 			commandList->SetGraphicsRootConstantBufferView(1, vertexResource_->GetwvpResource()->GetGPUVirtualAddress());
 			//SRVのDescriptorTableの先頭を設定。2はrootParameter[2]である
-			commandList->SetGraphicsRootDescriptorTable(2, textureResource_->GetuseMonsterBall() ? textureSrvHandleGPU[0] : textureSrvHandleGPU[3]);
+			commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU[3]);
 			//Lightの描画
 			commandList->SetGraphicsRootConstantBufferView(3, vertexResource_->GetDirectionalLightResource()->GetGPUVirtualAddress());
 			//instancing用のDataを読むためにStructuredBufferのSRVを設定
@@ -408,12 +409,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			commandList->SetGraphicsRootSignature(object3dRootSignature.Get());
 			commandList->SetPipelineState(object3dPipelineState.Get());
 			///==============================================================================================
-
 			//Sphere
 			commandList->IASetVertexBuffers(0, 1, &vertexResource_->GetVertexBufferViewSphere());
 			commandList->SetGraphicsRootConstantBufferView(0, vertexResource_->GetMaterialResourceSphere()->GetGPUVirtualAddress());
 			commandList->SetGraphicsRootConstantBufferView(1, vertexResource_->GetwvpResourceSphere()->GetGPUVirtualAddress());
-			commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU[1]);
+			commandList->SetGraphicsRootDescriptorTable(2, textureResource_->GetuseMonsterBall() ? textureSrvHandleGPU[4] : textureSrvHandleGPU[1]);
 			commandList->SetGraphicsRootConstantBufferView(3, vertexResource_->GetDirectionalLightResource()->GetGPUVirtualAddress());
 			commandList->SetGraphicsRootConstantBufferView(4, vertexResource_->GetCameraResource()->GetGPUVirtualAddress());
 			//描画
