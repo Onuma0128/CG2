@@ -1,16 +1,15 @@
 #pragma once
-#include <d3d12.h>
-#pragma comment(lib,"d3d12.lib")
 #include "externals/imgui/imgui.h"
 #include "externals/imgui/imgui_impl_dx12.h"
 #include "externals/imgui/imgui_impl_win32.h"
 #include "MT3.h"
 #include "LoadObjFile.h"
 #include "wrl.h"
+#include "ResourceObject.h"
 
 using Microsoft::WRL::ComPtr;
 
-ComPtr<ID3D12Resource> CreateBufferResource(ComPtr<ID3D12Device> device, size_t sizeInBytes);
+ResourceObject CreateBufferResource(ComPtr<ID3D12Device> device, size_t sizeInBytes);
 
 class VertexResource
 {

@@ -4,7 +4,7 @@ void TextureResource::Initialize(ComPtr<ID3D12Device> device, ComPtr<ID3D12Descr
 {
 	DirectX::ScratchImage mipImages = LoadTexture("resources/uvChecker.png");
 	const DirectX::TexMetadata& metadata = mipImages.GetMetadata();
-	textureResource = CreateTextureResource(device, metadata);
+	textureResource = CreateTextureResource(device, metadata).Get();
 	UploadTextureData(textureResource, mipImages);
 	//metaDataを基にSRVの設定
 	srvDesc.Format = metadata.format;
@@ -22,7 +22,7 @@ void TextureResource::Initialize(ComPtr<ID3D12Device> device, ComPtr<ID3D12Descr
 	//２枚目のTextureを読んで転送する
 	DirectX::ScratchImage mipImages2 = LoadTexture(modelData_.material.textureFilePath);
 	const DirectX::TexMetadata& metadata2 = mipImages2.GetMetadata();
-	textureResource2 = CreateTextureResource(device, metadata2);
+	textureResource2 = CreateTextureResource(device, metadata2).Get();
 	UploadTextureData(textureResource2, mipImages2);
 	//metaDataを基にSRVの設定
 	srvDesc2.Format = metadata2.format;
